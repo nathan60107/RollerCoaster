@@ -1,1 +1,3 @@
-﻿
+﻿  TrainView.cpp
+e:\systemfile\desktop\貝果的家\碩一\圖學\project3\rollercoaster\roller coaster\src\trainview.cpp(422): warning C4700: 使用了未初始化的區域變數 'realLen'
+  Roller Coaster.vcxproj -> E:\SystemFile\Desktop\貝果的家\碩一\圖學\Project3\RollerCoaster\x64\Debug\Roller Coaster.exe

@@ -245,15 +245,15 @@ float TrainView::calcNik(int i, int k, float u, vector<float> T)
 void TrainView::drawWood(Pnt3f rail, Pnt3f side, Pnt3f pos, bool doingShadows) {
 	if (!doingShadows)glColor3ub(255 - 173, 255 - 179, 255 - 195);
 	glBegin(GL_QUADS);
-	Pnt3f high = (rail * side).normalize(), wood[4];
+	Pnt3f high = (rail * side).normalize(), wood;
 	rail.normalize(), side.normalize();
 
 	for (int k = 1; k != 4; (k == 1) ? k = 0 : (k == 0) ? k = 2 : k++) {
-		wood[k] = pos;
-		wood[k] += side * (k % 2 ? 4 : -4);
-		wood[k] += rail * (k / 2 % 2 ? 1 : -1);
-		wood[k] += high * 0.1;
-		glVertex3f(wood[k].x, wood[k].y, wood[k].z);
+		wood = pos;
+		wood += side * (k % 2 ? 4 : -4);
+		wood += rail * (k / 2 % 2 ? 1 : -1);
+		wood += high * 0.1;
+		glVertex3f(wood.x, wood.y, wood.z);
 	}
 	glEnd();
 }
@@ -296,14 +296,14 @@ void TrainView::drawStuff(bool doingShadows)
 	//draw rail
 	int N = m_pTrack->points.size();
 	t_time += (isrun?speed:0);
-	//t_time += (isrun?arcSpeed:0);
 	int worldPos = 0;
+	vector<Pnt3f> veco, vecp, pToDraw;
+
 	glLineWidth(4);
 	glEnable(GL_LINE_SMOOTH);
 	glBegin(GL_LINES);
 
-	vector<Pnt3f> pToDraw, pToDraw2;
-	
+	//find knot position and orient.
 	if (curve == 0) {//spline_Linear
 		for (int i = 0; i < N; i++) {
 			Pnt3f p1 = m_pTrack->points[i % N].pos, p2 = m_pTrack->points[(i + 1) % N].pos,
@@ -313,134 +313,69 @@ void TrainView::drawStuff(bool doingShadows)
 			percent = 1.0 / DIVIDE_LINE;
 
 			for (int j = 0; j < DIVIDE_LINE; j++) {
-				Pnt3f orient_t1 = percent * (DIVIDE_LINE - j) * o1 + percent * j * o2,
-					orient_t2 = percent * (DIVIDE_LINE - j - 1 ) * o1 + percent * ( j + 1 ) * o2,
-					point1 = percent * (DIVIDE_LINE - j) * p1 + percent * j * p2,
-					point2 = percent * (DIVIDE_LINE - j - 1) * p1 + percent * ( j + 1 ) * p2;
-				orient_t1 = (p2 - p1)*orient_t1;
-				orient_t1.normalize();
-				orient_t1 = orient_t1 * 2.5f;
-				orient_t2 = (p2 - p1)*orient_t2;
-				orient_t2.normalize();
-				orient_t2 = orient_t2 * 2.5f;
-
-				pToDraw.push_back(point1 + orient_t1);
-				pToDraw.push_back(point2 + orient_t2);
-				pToDraw.push_back(point1 - orient_t1);
-				pToDraw.push_back(point2 - orient_t2);
-
-				if(j%2)drawWood(p2 - p1, orient_t1, point1, doingShadows);
-				if (worldPos <= t_time && t_time < worldPos + 10) {
-					Pnt3f trainPos = (worldPos + 10 - t_time) * point1 +
-						(t_time - worldPos) * point2;
-					train->changePos(Point3d(trainPos), Point3d(point2-point1).normalize(), (orient_t1*(point2 - point1)).normalize());
-					arcSpeed = speed / (point2 - point1).len()*5;
-				}
-				worldPos += 10;
-			}
-		}
-		
-	}
-	else if (curve == 1) {//spline_CardinalCubic
-		float Ax, Ay, Az, Bx, By, Bz, Cx, Cy, Cz, Dx, Dy, Dz,
-			Ex, Ey, Ez, Fx, Fy, Fz, Gx, Gy, Gz, Hx, Hy, Hz, tau = 0.5, m[16];
-		
-
-		for (int i = 0; i < N; i++) {
-			vector<Pnt3f> veco, vecp;
-			Pnt3f p1 = m_pTrack->points[i].pos, p2 = m_pTrack->points[(i + 1) % N].pos,
-				p3 = m_pTrack->points[(i + 2) % N].pos, p4 = m_pTrack->points[(i + 3) % N].pos,
-				o1 = m_pTrack->points[i].orient, o2 = m_pTrack->points[(i + 1) % N].orient,
-				o3 = m_pTrack->points[(i + 2)].orient, o4 = m_pTrack->points[(i + 3) % N].orient;
-			m[0] = -tau, m[1] = 2 - tau, m[2] = tau - 2, m[3] = tau;
-			m[4] = 2 * tau, m[5] = tau - 3, m[6] = 3 - 2 * tau, m[7] = -tau;
-			m[8] = -tau, m[9] = 0, m[10] = tau, m[11] = 0;
-			m[12] = 0, m[13] = 1, m[14] = 0, m[15] = 0;
-
-			Ax = m[0] * p1.x + m[1] * p2.x + m[2] * p3.x + m[3] * p4.x;
-			Bx = m[4] * p1.x + m[5] * p2.x + m[6] * p3.x + m[7] * p4.x;
-			Cx = m[8] * p1.x + m[9] * p2.x + m[10] * p3.x + m[11] * p4.x;
-			Dx = m[12] * p1.x + m[13] * p2.x + m[14] * p3.x + m[15] * p4.x;
-			Ay = m[0] * p1.y + m[1] * p2.y + m[2] * p3.y + m[3] * p4.y;
-			By = m[4] * p1.y + m[5] * p2.y + m[6] * p3.y + m[7] * p4.y;
-			Cy = m[8] * p1.y + m[9] * p2.y + m[10] * p3.y + m[11] * p4.y;
-			Dy = m[12] * p1.y + m[13] * p2.y + m[14] * p3.y + m[15] * p4.y;
-			Az = m[0] * p1.z + m[1] * p2.z + m[2] * p3.z + m[3] * p4.z;
-			Bz = m[4] * p1.z + m[5] * p2.z + m[6] * p3.z + m[7] * p4.z;
-			Cz = m[8] * p1.z + m[9] * p2.z + m[10] * p3.z + m[11] * p4.z;
-			Dz = m[12] * p1.z + m[13] * p2.z + m[14] * p3.z + m[15] * p4.z;
-
-			Ex = m[0] * o1.x + m[1] * o2.x + m[2] * o3.x + m[3] * o4.x;
-			Fx = m[4] * o1.x + m[5] * o2.x + m[6] * o3.x + m[7] * o4.x;
-			Gx = m[8] * o1.x + m[9] * o2.x + m[10] * o3.x + m[11] * o4.x;
-			Hx = m[12] * o1.x + m[13] * o2.x + m[14] * o3.x + m[15] * o4.x;
-			Ey = m[0] * o1.y + m[1] * o2.y + m[2] * o3.y + m[3] * o4.y;
-			Fy = m[4] * o1.y + m[5] * o2.y + m[6] * o3.y + m[7] * o4.y;
-			Gy = m[8] * o1.y + m[9] * o2.y + m[10] * o3.y + m[11] * o4.y;
-			Hy = m[12] * o1.y + m[13] * o2.y + m[14] * o3.y + m[15] * o4.y;
-			Ez = m[0] * o1.z + m[1] * o2.z + m[2] * o3.z + m[3] * o4.z;
-			Fz = m[4] * o1.z + m[5] * o2.z + m[6] * o3.z + m[7] * o4.z;
-			Gz = m[8] * o1.z + m[9] * o2.z + m[10] * o3.z + m[11] * o4.z;
-			Hz = m[12] * o1.z + m[13] * o2.z + m[14] * o3.z + m[15] * o4.z;
-
-			DIVIDE_LINE = (p3 - p2).len() / 14 * 4;
-			percent = 1.0 / DIVIDE_LINE;
-			for (int j = 0; j <= DIVIDE_LINE; j++) {
-				float u = 1.0 * j / DIVIDE_LINE;
-				Pnt3f p = Pnt3f(Ax * u*u*u + Bx * u*u + Cx * u + Dx,
-					Ay * u*u*u + By * u*u + Cy * u + Dy,
-					Az * u*u*u + Bz * u*u + Cz * u + Dz),
-					o = Pnt3f(Ex * u*u*u + Fx * u*u + Gx * u + Hx,
-						Ey * u*u*u + Fy * u*u + Gy * u + Hy,
-						Ez * u*u*u + Fz * u*u + Gz * u + Hz);
-				o = (p3 - p2)*o;
-				o.normalize();
-				o = o * 2.5f;
+				Pnt3f o = percent * (DIVIDE_LINE - j) * o1 + percent * j * o2,
+					p = percent * (DIVIDE_LINE - j) * p1 + percent * j * p2;
 
 				vecp.push_back(p);
 				veco.push_back(o);
 			}
-			for (int j = 0; j < DIVIDE_LINE; j++) {
-				pToDraw.push_back(vecp[j] + veco[j]);
-				pToDraw.push_back(vecp[j+1] + veco[j+1]);
-				pToDraw2.push_back(vecp[j] - veco[j]);
-				pToDraw2.push_back(vecp[j+1] - veco[j+1]);
+		}
+	}
+	else if (curve == 1) {//spline_CardinalCubic
+		float tau = 0.5, m[16];
+		
+		for (int i = 0; i < N; i++) {
 			
+			Pnt3f p1 = m_pTrack->points[i].pos, p2 = m_pTrack->points[(i + 1) % N].pos,
+				p3 = m_pTrack->points[(i + 2) % N].pos, p4 = m_pTrack->points[(i + 3) % N].pos,
+				o1 = m_pTrack->points[i].orient, o2 = m_pTrack->points[(i + 1) % N].orient,
+				o3 = m_pTrack->points[(i + 2)].orient, o4 = m_pTrack->points[(i + 3) % N].orient;
 
-				drawWood(vecp[j+1] - vecp[j], veco[j], vecp[j], doingShadows);
-				if (worldPos <= t_time && t_time < worldPos + 10) {
-					Pnt3f trainPos = (worldPos + 10 - t_time) * vecp[j] +
-						(t_time - worldPos) * vecp[j + 1],
-						trainDir = (worldPos + 10 - t_time) * (vecp[j + 1] - vecp[j]).normalize() +
-						(t_time - worldPos) * (vecp[(j + 2)% (DIVIDE_LINE+1)] - vecp[j + 1]).normalize();
-					train->changePos(Point3d(trainPos), trainDir.normalize(), (veco[j]* (vecp[j + 1] - vecp[j])).normalize());
-					arcSpeed = speed / (vecp[j + 1] - vecp[j]).len() * 5;
-				}
-				worldPos += 10;
+			QMatrix4x4 matM(-tau, 2 - tau, tau - 2, tau,
+							2 * tau, tau - 3, 3 - 2 * tau, -tau,
+							-tau, 0, tau, 0,
+							0, 1, 0, 0);
+			QMatrix4x4 matGP(p1.x, p1.y, p1.z, 0,
+							p2.x, p2.y, p2.z, 0,
+							p3.x, p3.y, p3.z, 0,
+							p4.x, p4.y, p4.z, 0);
+			QMatrix4x4 matGO(o1.x, o1.y, o1.z, 0,
+							o2.x, o2.y, o2.z, 0,
+							o3.x, o3.y, o3.z, 0,
+							o4.x, o4.y, o4.z, 0);
+
+			DIVIDE_LINE = (p3 - p2).len() / 14 * 4;
+			percent = 1.0 / DIVIDE_LINE;
+			for (int j = 0; j < DIVIDE_LINE; j++) {
+				float u = 1.0 * j / DIVIDE_LINE;
+				QMatrix4x4 matT(u*u*u, u*u, u, 1,
+								0, 0, 0, 0,
+								0, 0, 0, 0,
+								0, 0, 0, 0);
+				auto matP = matT * matM * matGP,matO = matT * matM * matGO;
+
+				vecp.push_back(Pnt3f(matP.data()[0], matP.data()[4], matP.data()[8]));
+				veco.push_back(Pnt3f(matO.data()[0], matO.data()[4], matO.data()[8]));
 			}
 		}
 		//Reference: https://blog.csdn.net/ZJU_fish1996/article/details/52735947
 	}
 	else if (curve == 2) {//spline_CubicB_Spline
 		int K = 3;
-		vector<Pnt3f> veco, vecp;
-
+		float totalLen = 0.0;
 		vector<float> T(N + K + K + 1);
+
 		for (int i = 0; i <= N + K + K; i++) {
 			T[i] = i;
 		}
 
-		float totalLen = 0.0, realLen;
-		for (int j = 0; j < N + K - 1; j++)totalLen += (m_pTrack->points[(j + 1) % N].pos - m_pTrack->points[j % N].pos).len();
-		DIVIDE_LINE = totalLen / 37.5;
-		
-		vector<float> trackLen(N);
-		for (int j = 0; j < N; j++) {
-			trackLen[j] = (m_pTrack->points[(j + 1) % N].pos - m_pTrack->points[j % N].pos).len();
-			realLen += trackLen[j];
+		for (int j = 0; j < N + K - 1; j++) {
+			totalLen += (m_pTrack->points[(j + 1) % N].pos - m_pTrack->points[j % N].pos).len();
 		}
 
-		for (float i = DIVIDE_LINE * K; i <= DIVIDE_LINE * (N+K); i+=0.5) {
+		DIVIDE_LINE = totalLen / 37.5;
+
+		for (float i = DIVIDE_LINE * K; i < DIVIDE_LINE * (N+K); i+=0.5) {
 			float u = 1.0 * i / DIVIDE_LINE;
 			Pnt3f p(0, 0, 0), o(0,0,0);
 			for (int j = 0; j < N + K; j++) {
@@ -454,54 +389,34 @@ void TrainView::drawStuff(bool doingShadows)
 			}
 		}
 
-		/*for(float u = K; u<=(N+K); u += realLen / trackLen[((int)u - 1 + N) % N] / sqrt(trackLen[((int)u - 1 + N) % N]) / 5.0){{
-			
-		//for (int q = K; q < (N + K); q++) {
-			//for (float u = q; u < q + 1; u += realLen / trackLen[(q - 1 + N) % N] / sqrt(trackLen[(q - 1 + N) % N]) / 5.0) {
-				//printf("%f\n", u);
-				//float u = 1.0 * i / DIVIDE_LINE;
-				//int cur = i / DIVIDE_LINE - K;
-				Pnt3f p(0, 0, 0), o(0, 0, 0);
-				for (int j = 0; j < N + K; j++) {
-					float Nik = calcNik(j, K, u, T);
-					p += m_pTrack->points[(j - K + N) % N].pos * Nik;
-					o += m_pTrack->points[(j - K + N) % N].orient * Nik;
-				}
-				//if (vecp.empty() || (p - vecp[vecp.size() - 1]).len() >= 4) {
-					vecp.push_back(p);
-					veco.push_back(o);
-				//}
-			}
-		}*/
-
-		for (int i = 0; i < vecp.size()-1; i++) {
-			Pnt3f orient1 = veco[i], orient2 = veco[i+1];
-			orient1 = (vecp[i + 1] - vecp[i])*orient1;
-			orient1.normalize();
-			orient1 = orient1 * 2.5f;
-			orient2 = (vecp[i + 1] - vecp[i])*orient2;
-			orient2.normalize();
-			orient2 = orient2 * 2.5f;
-
-			pToDraw.push_back(vecp[i] + orient1);
-			pToDraw.push_back(vecp[i + 1] + orient2);
-			pToDraw.push_back(vecp[i] - orient1);
-			pToDraw.push_back(vecp[i + 1] - orient2);
-
-			drawWood(vecp[i+1]-vecp[i], orient1, vecp[i], doingShadows);
-			if (worldPos <= t_time && t_time < worldPos + 10) {
-				Pnt3f trainPos = (worldPos + 10 - t_time) * vecp[i] +
-					(t_time - worldPos) * vecp[i+1];
-				//(veco[i] * (vecp[i + 1] - vecp[i])).normalize().printself();
-				train->changePos(Point3d(trainPos), Point3d(vecp[i+1] - vecp[i]).normalize(), (orient1* (vecp[i + 1] - vecp[i])).normalize());
-				arcSpeed = speed / (vecp[i + 1] - vecp[i]).len() * 5;
-			}
-			worldPos += 10;
-		}
-
 		/*Reference: https://www.itread01.com/content/1548858635.html, 
 		https://darkblack01.blogspot.com/2013/11/b-spline-curve.html,
 		https://blog.csdn.net/tuqu/article/details/5177405 */
+	}
+	glEnd();
+	
+	int M = vecp.size();
+	for (int i = 0; i < M; i++) {//using knot to calculate position of rail, sleeper and train.
+		Pnt3f v1 = vecp[i], v2 = vecp[(i + 1) % M], v3 = vecp[(i + 2) % M],
+			o1 = veco[i], o2 = veco[(i + 1) % M],
+			side1 = ((v2 - v1) * o1).normalize() * 2.5,
+			side2 = ((v2 - v1) * o2).normalize() * 2.5;
+
+		pToDraw.push_back(v1 + side1);
+		pToDraw.push_back(v2 + side2);
+		pToDraw.push_back(v1 - side1);
+		pToDraw.push_back(v2 - side2);
+		drawWood(v2 - v1, side1, v1, doingShadows);
+
+		if (worldPos <= t_time && t_time < worldPos + 10) {
+			Pnt3f trainPos = (worldPos + 10 - t_time) * v1 +
+				(t_time - worldPos) * v2,
+				trainDir = (worldPos + 10 - t_time) * (v2 - v1).normalize() +
+				(t_time - worldPos) * (v3 - v2).normalize();
+
+			train->changePos(Point3d(trainPos), trainDir.normalize(), (side1 * (v2 - v1)).normalize());
+		}
+		worldPos += 10;
 	}
 
 	glLineWidth(3);
@@ -509,15 +424,12 @@ void TrainView::drawStuff(bool doingShadows)
 	if (!doingShadows) {
 		glColor3ub(255 - 170, 255 - 168, 255 - 169);
 	}
-	for (auto a : pToDraw) {
-		glVertex3f(a.x, a.y, a.z);
-	}
-	for (auto a : pToDraw2) {
+	for (auto a : pToDraw) {//draw rail
 		glVertex3f(a.x, a.y, a.z);
 	}
 	glEnd();
 
-	//draw train?
+	//draw train
 	train->render(0,0);
 	if (t_time > worldPos) t_time -= worldPos;
 	

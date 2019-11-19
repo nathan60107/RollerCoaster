@@ -78,7 +78,6 @@ public:
 	unsigned int DIVIDE_LINE = 20;
 	float percent;
 	float speed;
-	float arcSpeed;
 
 };  
 #endif // TRAINVIEW_H  
