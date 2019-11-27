@@ -20,7 +20,8 @@ AppMain::AppMain(QWidget *parent)
 	this->trainview->camera = 0;
 	this->trainview->track = 0;
 	this->trainview->curve = 0;
-	this->trainview->isrun = false;
+	this->trainview->isrun = true;
+	ui.bPlay->setIcon(QIcon(":/AppMain/Resources/Icons/play.ico"));
 
 	setWindowTitle( "Roller Coaster" );
 

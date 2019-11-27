@@ -185,6 +185,8 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="heightMap.cpp" />
+    <ClCompile Include="myTriangle.cpp" />
     <ClCompile Include="Src\AppMain.cpp" />
     <ClCompile Include="Src\ControlPoint.cpp" />
     <ClCompile Include="Src\main.cpp" />
@@ -221,11 +223,14 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GeneratedFiles\ui_AppMain.h" />
+    <ClInclude Include="heightMap.h" />
+    <ClInclude Include="myTriangle.h" />
     <ClInclude Include="Include\ControlPoint.H" />
     <ClInclude Include="Include\Model.h" />
     <ClInclude Include="Include\point3d.h" />
     <ClInclude Include="Include\Square.h" />
     <ClInclude Include="Include\Track.H" />
+    <ClInclude Include="resource.h" />
     <CustomBuild Include="Include\TrainView.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
@@ -244,7 +249,6 @@
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -DUNICODE -DWIN32 -DWIN64 -DQT_NO_DEBUG -DNDEBUG -D_CONSOLE -DQT_CORE_LIB -DQT_OPENGL_LIB -DQT_OPENGLEXTENSIONS_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -D%(PreprocessorDefinitions)  "-I." "-I.\Include" "-I.\GeneratedFiles" "-I.\GeneratedFiles\$(ConfigurationName)" "-IC:\Qt\Qt5.2.0\5.2.0\msvc2010_opengl\include" "-IC:\Qt\Qt5.2.0\5.2.0\msvc2010_opengl\include\QtCore" "-IC:\Qt\Qt5.2.0\5.2.0\msvc2010_opengl\include\QtGui" "-IC:\Qt\Qt5.2.0\5.2.0\msvc2010_opengl\include\QtWidgets" "-ID:\OgreSDK_vc10_v1-8-1\include" "-ID:\OgreSDK_vc10_v1-8-1\include\OGRE" "-ID:\OgreSDK_vc10_v1-8-1\include\OIS" "-ID:\OgreSDK_vc10_v1-8-1\boost" "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtOpenGLExtensions" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE"</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -DUNICODE -DWIN32 -DWIN64 -DQT_NO_DEBUG -DNDEBUG -D_CONSOLE -DQT_CORE_LIB -DQT_OPENGL_LIB -DQT_OPENGLEXTENSIONS_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -D%(PreprocessorDefinitions)  "-I." "-I.\Include" "-I.\GeneratedFiles" "-I.\GeneratedFiles\$(ConfigurationName)" "-IC:\Qt\Qt5.2.0\5.2.0\msvc2010_opengl\include" "-IC:\Qt\Qt5.2.0\5.2.0\msvc2010_opengl\include\QtCore" "-IC:\Qt\Qt5.2.0\5.2.0\msvc2010_opengl\include\QtGui" "-IC:\Qt\Qt5.2.0\5.2.0\msvc2010_opengl\include\QtWidgets" "-ID:\OgreSDK_vc10_v1-8-1\include" "-ID:\OgreSDK_vc10_v1-8-1\include\OGRE" "-ID:\OgreSDK_vc10_v1-8-1\include\OIS" "-ID:\OgreSDK_vc10_v1-8-1\boost" "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtOpenGL" "-I$(QTDIR)\include\QtOpenGLExtensions" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtANGLE"</Command>
     </CustomBuild>
-    <ClInclude Include="Include\Triangle.h" />
     <ClInclude Include="Include\Utilities\3DUtils.h" />
     <ClInclude Include="Include\Utilities\ArcBallCam.H" />
     <ClInclude Include="Include\Utilities\Pnt3f.H" />
@@ -287,6 +291,9 @@
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\rcc.exe" -name "%(Filename)" -no-compress "%(FullPath)" -o .\GeneratedFiles\qrc_%(Filename).cpp</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\rcc.exe" -name "%(Filename)" -no-compress "%(FullPath)" -o .\GeneratedFiles\qrc_%(Filename).cpp</Command>
     </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Roller Coaster.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

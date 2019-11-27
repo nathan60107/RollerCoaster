@@ -89,6 +89,12 @@
     <ClCompile Include="Src\Model.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="myTriangle.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="heightMap.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="AppMain.ui">
@@ -123,9 +129,6 @@
     <ClInclude Include="Include\Track.H">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\Triangle.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Include\Square.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -135,5 +138,17 @@
     <ClInclude Include="Include\point3d.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="myTriangle.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="heightMap.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Roller Coaster.rc" />
   </ItemGroup>
 </Project>

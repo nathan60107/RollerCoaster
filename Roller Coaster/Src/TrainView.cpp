@@ -21,15 +21,22 @@ void TrainView::initializeGL()
 	square->Init();
 	//Initialize texture 
 	initializeTexture();
+
+	//change part
+	test = new myTriangle();
+	test->InitShader("../../Shader/testSq.vs", "../../Shader/testSq.fs");
+	test->InitVAO();
+	test->InitVBO();;
 	
 }
 void TrainView::initializeTexture()
 {
 	//Load and create a texture for square;'stexture
 	QOpenGLTexture* texture = new QOpenGLTexture(QImage("../../Textures/Tupi.bmp"));
+	QOpenGLTexture* heightMapTexture = new QOpenGLTexture(QImage("../../Textures/sand.png"));
 	Textures.push_back(texture);
+	Textures.push_back(heightMapTexture);
 	train = new Model("../../Model/train/11709_train_v1_L3.obj", 10, Point3d(0, 0, 0));
-	//train->changePos({ 0,0,0 });
 }
 
 void TrainView:: resetArcball()
@@ -144,6 +151,17 @@ void TrainView::paintGL()
 
 	//Call triangle's render function, pass ModelViewMatrex and ProjectionMatrex
  	triangle->Paint(ProjectionMatrex,ModelViewMatrex);
+
+	test->Begin();
+		//Active Texture
+		glActiveTexture(GL_TEXTURE1);
+		//Bind square's texture
+		Textures[1]->bind();
+		//pass texture to shader
+		square->shaderProgram->setUniformValue("Texture", 1);
+
+		test->Paint(ProjectionMatrex, ModelViewMatrex, QVector3D(arcball.eyeX, arcball.eyeY, arcball.eyeZ));
+	test->End();
     
 	//we manage textures by Trainview class, so we modify square's render function
 	square->Begin();
@@ -196,27 +214,15 @@ setProjection()
 		glRotatef(-90,1,0,0);
 		update();
 	}else if (this->camera == 2) {
-		/*glMatrixMode(GL_MODELVIEW);
-		glLoadIdentity();
-		gluLookAt(train->pos.x, train->pos.y, train->pos.z,
-			train->front.x, train->front.y, train->front.z,
-			train->orient.x, train->orient.y, train->orient.z);
-		update();*/
-
 		glMatrixMode(GL_PROJECTION);
 		glLoadIdentity();
-		//gluPerspective(120, 1, 1, 200);
 		gluPerspective(arcball.fieldOfView, aspect, .1, 1000);
 		gluLookAt(train->pos.x/10 + train->front.x * 6, train->pos.y/10 + train->front.y * 6 + 3, train->pos.z/10 + train->front.z * 6,
 			train->pos.x/10 + train->front.x*7, train->pos.y/10 + train->front.y*7 + 3, train->pos.z/10 + train->front.z*7,
 			train->orient.x, train->orient.y, train->orient.z);
-		/*gluLookAt(train->pos.x, train->pos.y, train->pos.z,
-			train->front.x, train->front.y, train->front.z,
-			train->orient.x, train->orient.y, train->orient.z);*/
 		glMatrixMode(GL_MODELVIEW);
 		glLoadIdentity();
 		update();
-
 	}
 	// Or do the train view or other view here
 	//####################################################################

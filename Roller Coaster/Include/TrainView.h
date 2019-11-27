@@ -11,6 +11,7 @@
 #include "Track.H"
 #include "Triangle.h"
 #include "Square.h"
+#include "myTriangle.h"
 #include "Model.h"
 
 class AppMain;
@@ -69,6 +70,7 @@ public:
 	bool isrun;
 	Triangle* triangle;
 	Square* square;
+	myTriangle *test;
 	GLfloat ProjectionMatrex[16];
 	GLfloat ModelViewMatrex[16];
 	QVector<QOpenGLTexture*> Textures;
@@ -77,7 +79,7 @@ public:
 
 	unsigned int DIVIDE_LINE = 20;
 	float percent;
-	float speed;
+	float speed = 0.5;
 
 };  
 #endif // TRAINVIEW_H  
