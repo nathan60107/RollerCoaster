@@ -24,9 +24,10 @@ void TrainView::initializeGL()
 
 	//change part
 	test = new myTriangle();
-	test->InitShader("../../Shader/testSq.vs", "../../Shader/testSq.fs");
+	test->InitShader("../../Shader/mountain.vs", "../../Shader/mountain.fs", false);
+	test->InitShader("../../Shader/testSq.vs", "../../Shader/testSq.fs", true);
 	test->InitVAO();
-	test->InitVBO();;
+	test->InitVBO();
 	
 }
 void TrainView::initializeTexture()
@@ -151,18 +152,7 @@ void TrainView::paintGL()
 
 	//Call triangle's render function, pass ModelViewMatrex and ProjectionMatrex
  	triangle->Paint(ProjectionMatrex,ModelViewMatrex);
-
-	test->Begin();
-		//Active Texture
-		glActiveTexture(GL_TEXTURE1);
-		//Bind square's texture
-		Textures[1]->bind();
-		//pass texture to shader
-		square->shaderProgram->setUniformValue("Texture", 1);
-
-		test->Paint(ProjectionMatrex, ModelViewMatrex, QVector3D(arcball.eyeX, arcball.eyeY, arcball.eyeZ));
-	test->End();
-    
+	
 	//we manage textures by Trainview class, so we modify square's render function
 	square->Begin();
 		//Active Texture
@@ -174,6 +164,24 @@ void TrainView::paintGL()
 		//Call square's render function, pass ModelViewMatrex and ProjectionMatrex
 		square->Paint(ProjectionMatrex,ModelViewMatrex);
 	square->End();
+
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	test->Begin(false);
+		//Active Texture
+		glActiveTexture(GL_TEXTURE1);
+		//Bind square's texture
+		Textures[1]->bind();
+		//pass texture to shader
+		test->mountainShaderProgram->setUniformValue("Texture", 1);
+
+		test->PaintMountain(ProjectionMatrex, ModelViewMatrex, QVector3D(arcball.eyeX, arcball.eyeY, arcball.eyeZ));
+	test->End(false);
+
+	test->Begin(true);
+		test->PaintWater(ProjectionMatrex, ModelViewMatrex, QVector3D(arcball.eyeX, arcball.eyeY, arcball.eyeZ));
+	test->End(true);
+	glDisable(GL_BLEND);
 }
 
 //************************************************************************

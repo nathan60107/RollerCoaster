@@ -66,17 +66,9 @@ vec3 waveNormal(float x, float y) {
 void main(void)
 {
 	vec4 pos = vec4(vertex, 1.0);
-    pos.z = waterHeight + waveHeight(pos.x, pos.y);
+    pos.y = waterHeight + waveHeight(pos.x, pos.z);
     position = pos.xyz / pos.w;
-    worldNormal = waveNormal(pos.x, pos.y);
+    worldNormal = waveNormal(pos.x, pos.z);
     eyeNormal = (inverse(transpose(ModelViewMatrix)) * vec4(worldNormal, 0)).xyz;
     gl_Position = ProjectionMatrix * ModelViewMatrix * pos;
-	/*vec3 v = vertex;
-	//v.y += 30;
-	v.y *= height/25.5;
-	//v.y += amplitude * sin( v.x*1000.0 + t/period*2*pi);
-	vec4 pos = ProjectionMatrix * ModelViewMatrix * vec4(v, 1.0);
-    gl_Position = pos;
-	
-	uv = textureCord;*/
 }

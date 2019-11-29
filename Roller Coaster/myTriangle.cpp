@@ -18,13 +18,22 @@ void myTriangle::DimensionTransformation(GLfloat source[], GLfloat target[][4])
 			i++;
 		}
 }
-void myTriangle::Begin()
+void myTriangle::Begin(bool isWater)
 {
 	//Bind the shader we want to draw with
-	shaderProgram->bind();
+	/*shaderProgram->bind();
 	//Bind the VAO we want to draw
-	vao.bind();
+	vao.bind();*/
+
+	if (isWater) {
+		waterShaderProgram->bind();
+		waterVao.bind();
+	} else{
+		mountainShaderProgram->bind();
+		mountainVao.bind();
+	}
 }
+
 std::string format(const std::string fmt, ...) {
 	va_list args;
 
@@ -43,101 +52,136 @@ std::string format(const std::string fmt, ...) {
 	va_end(args);
 	return str;
 }
+
 float uniformRandomInRange(float min, float max) {
 	double n = (double)rand() / (double)RAND_MAX;
 	double v = min + n * (max - min);
 	return v;
 }
 
-void myTriangle::Paint(GLfloat* ProjectionMatrix, GLfloat* ModelViewMatrix, QVector3D eyeDir)
+void myTriangle::PaintMountain(GLfloat* ProjectionMatrix, GLfloat* ModelViewMatrix, QVector3D eyeDir)
 {
 	GLfloat P[4][4];
 	GLfloat MV[4][4];
 	DimensionTransformation(ProjectionMatrix, P);
 	DimensionTransformation(ModelViewMatrix, MV);
-	
+
 	//pass projection matrix to shader
-	shaderProgram->setUniformValue("ProjectionMatrix", P);
+	mountainShaderProgram->setUniformValue("ProjectionMatrix", P);
 	//pass modelview matrix to shader
-	shaderProgram->setUniformValue("ModelViewMatrix", MV);
+	mountainShaderProgram->setUniformValue("ModelViewMatrix", MV);
 
-	shaderProgram->setUniformValue("waterHeight", 50);
-	shaderProgram->setUniformValue("time", t); t++;
-	
-	shaderProgram->setUniformValue("eyePos", eyeDir);
-
-	shaderProgram->setUniformValue("numWaves", 4);
-	//shaderProgram->setUniformValue("envMap", 0);
-	for (int i = 0; i < 4; ++i) {
-		GLfloat amplitude = 0.5f / (i + 1);
-		shaderProgram->setUniformValue(format("amplitude[%d]", i).c_str(), amplitude);
-
-		float wavelength = 8 * 3.14159 / (i + 1);
-		shaderProgram->setUniformValue(format("wavelength[%d]", i).c_str(), wavelength);
-
-		float speed = 1.0f + 2 * i;
-		shaderProgram->setUniformValue(format("speed[%d]", i).c_str(), speed);
-
-		float angle = uniformRandomInRange(-M_PI / 3, M_PI / 3);
-		shaderProgram->setUniformValue(format("direction[%d]", i).c_str(), cos(angle), sin(angle));
-	}
-	
 	// Bind the buffer so that it is the current active buffer.
 	vvbo.bind();
 	// Enable Attribute 0
-	shaderProgram->enableAttributeArray(0);
+	mountainShaderProgram->enableAttributeArray(0);
 	// Set Attribute 0 to be position
-	shaderProgram->setAttributeArray(0, GL_FLOAT, 0, 3, NULL);
+	mountainShaderProgram->setAttributeArray(0, GL_FLOAT, 0, 3, NULL);
 	//unbind buffer
 	vvbo.release();
 
-	/*// Bind the buffer so that it is the current active buffer
-	cvbo.bind();
+	//printf("%d\n", waterVbo.size());
+	// Bind the buffer so that it is the current active buffer.
+	tvbo.bind();
 	// Enable Attribute 1
-	shaderProgram->enableAttributeArray(1);
-	// Set Attribute 1 to be color
-	shaderProgram->setAttributeArray(1, GL_FLOAT, 0, 1, NULL);
+	waterShaderProgram->enableAttributeArray(1);
+	// Set Attribute 0 to be position
+	waterShaderProgram->setAttributeArray(1, GL_FLOAT, 0, 2, NULL);
 	//unbind buffer
-	cvbo.release();*/
-
-	// Bind the buffer so that it is the current active buffer
-	/*tvbo.bind();
-	// Enable Attribute 2
-	shaderProgram->enableAttributeArray(2);
-	// Set Attribute 2 to be color
-	shaderProgram->setAttributeArray(2, GL_FLOAT, 0, 2, NULL);
-	//unbind buffer
-	tvbo.release();*/
+	tvbo.release();
 
 	//Draw a myTriangle with 3 indices starting from the 0th index
-	glDrawArrays(GL_TRIANGLES, 0, vertices.size());
+	glDrawArrays(GL_TRIANGLES, 0, triangleCount);
 }
-void myTriangle::End()
+void myTriangle::PaintWater(GLfloat* ProjectionMatrix, GLfloat* ModelViewMatrix, QVector3D eyeDir)
+{
+	GLfloat P[4][4];
+	GLfloat MV[4][4];
+	DimensionTransformation(ProjectionMatrix, P);
+	DimensionTransformation(ModelViewMatrix, MV);
+
+	//pass projection matrix to shader
+	waterShaderProgram->setUniformValue("ProjectionMatrix", P);
+	//pass modelview matrix to shader
+	waterShaderProgram->setUniformValue("ModelViewMatrix", MV);
+
+	waterShaderProgram->setUniformValue("waterHeight", (float)waterHeight);
+	waterShaderProgram->setUniformValue("time", (float)(clock() - t));
+
+	waterShaderProgram->setUniformValue("eyePos", eyeDir);
+
+	waterShaderProgram->setUniformValue("numWaves", 4);
+	//waterShaderProgram->setUniformValue("envMap", 0);
+	for (int i = 0; i < 4; ++i) {
+		GLfloat amplitude = 0.5f / (i + 1);
+		waterShaderProgram->setUniformValue(format("amplitude[%d]", i).c_str(), amplitude);
+
+		float wavelength = 8 * 3.14159 / (i + 1);
+		waterShaderProgram->setUniformValue(format("wavelength[%d]", i).c_str(), wavelength);
+
+		float speed = 1.0f + 2 * i;
+		waterShaderProgram->setUniformValue(format("speed[%d]", i).c_str(), speed);
+
+		float angle = uniformRandomInRange(-M_PI / 3, M_PI / 3);
+		waterShaderProgram->setUniformValue(format("direction[%d]", i).c_str(), cos(angle), sin(angle));
+	}
+
+	//printf("%d\n", waterVbo.size());
+	// Bind the buffer so that it is the current active buffer.
+	waterVbo.bind();
+	// Enable Attribute 0
+	waterShaderProgram->enableAttributeArray(0);
+	// Set Attribute 0 to be position
+	waterShaderProgram->setAttributeArray(0, GL_FLOAT, 0, 3, NULL);
+	//unbind buffer
+	waterVbo.release();
+
+	//Draw a myTriangle with 3 indices starting from the 0th index
+	glDrawArrays(GL_TRIANGLES, 0, waterCount);
+}
+void myTriangle::End(bool isWater)
 {
 	//Disable Attribute 0&1
-	shaderProgram->disableAttributeArray(0);
-	//shaderProgram->disableAttributeArray(1);
-	//shaderProgram->disableAttributeArray(2);
+	/*shaderProgram->disableAttributeArray(0);
 
 	vao.release();
-	shaderProgram->release();
-}
-void myTriangle::Init()
-{
-	InitShader("../../Shader/Triangle.vs", "../../Shader/Triangle.fs");
-	InitVAO();
-	InitVBO();
+	shaderProgram->release();*/
+
+	if (isWater) {
+		waterShaderProgram->disableAttributeArray(0);
+		waterVao.release();
+		waterShaderProgram->release();
+	}
+	else {
+		mountainShaderProgram->disableAttributeArray(0);
+		mountainShaderProgram->disableAttributeArray(1);
+		mountainVao.release();
+		mountainShaderProgram->release();
+	}
 }
 void myTriangle::InitVAO()
 {
 	// Create Vertex Array Object
-	vao.create();
+	/*vao.create();
 	// Bind the VAO so it is the current active VAO
-	vao.bind();
+	vao.bind();*/
+
+	mountainVao.create();
+	mountainVao.bind();
+
+	waterVao.create();
+	waterVao.bind();
 }
 void myTriangle::InitVBO()
 {
-	heightMap hm(QString("../../Textures/heightmap.jpg"), 200, 40);
+	waterHeight = 10;
+	heightMap hm(QString("../../Textures/heightmap.jpg"), 200, 30, waterHeight);
+	hm.generateWater();
+
+	triangleCount = hm.verticesVbo.size();
+	waterCount = hm.water_verticesVbo.size();
+	textureCount = hm.textureCordVbo.size();
+	t = clock();
 
 	// Create Buffer for position
 	vvbo.create();
@@ -147,19 +191,34 @@ void myTriangle::InitVBO()
 	vvbo.setUsagePattern(QOpenGLBuffer::StaticDraw);
 	// Allocate and initialize the information
 	vvbo.allocate(hm.verticesVbo.constData(), hm.verticesVbo.size() * sizeof(QVector3D));
+
+	tvbo.create();
+	tvbo.bind();
+	tvbo.setUsagePattern(QOpenGLBuffer::StaticDraw);
+	tvbo.allocate(hm.textureCordVbo.constData(), hm.textureCordVbo.size() * sizeof(QVector2D));
+
+	//printf("%d\n", hm.water_verticesVbo.size());
+	waterVbo.create();
+	waterVbo.bind();
+	waterVbo.setUsagePattern(QOpenGLBuffer::StaticDraw);
+	waterVbo.allocate(hm.water_verticesVbo.constData(), hm.water_verticesVbo.size() * sizeof(QVector3D));
 }
-void myTriangle::InitShader(QString vertexShaderPath, QString fragmentShaderPath)
+void myTriangle::InitShader(QString vertexShaderPath, QString fragmentShaderPath, bool isWater)
 {
+	auto &shaderP = (isWater ? waterShaderProgram : mountainShaderProgram);
+	auto &vertexS = (isWater ? waterVertexShader : mountainVertexShader),
+		&fragmentS = (isWater ? waterFragmentShader : mountainFragmentShader);
+
 	// Create Shader
-	shaderProgram = new QOpenGLShaderProgram();
+	shaderP = new QOpenGLShaderProgram();
 	QFileInfo  vertexShaderFile(vertexShaderPath);
 	if (vertexShaderFile.exists())
 	{
-		vertexShader = new QOpenGLShader(QOpenGLShader::Vertex);
-		if (vertexShader->compileSourceFile(vertexShaderPath))
-			shaderProgram->addShader(vertexShader);
+		vertexS = new QOpenGLShader(QOpenGLShader::Vertex);
+		if (vertexS->compileSourceFile(vertexShaderPath))
+			shaderP->addShader(vertexS);
 		else
-			qWarning() << "Vertex Shader Error " << vertexShader->log();
+			qWarning() << "Vertex Shader Error " << vertexS->log();
 	}
 	else
 		qDebug() << vertexShaderFile.filePath() << " can't be found";
@@ -167,13 +226,13 @@ void myTriangle::InitShader(QString vertexShaderPath, QString fragmentShaderPath
 	QFileInfo  fragmentShaderFile(fragmentShaderPath);
 	if (fragmentShaderFile.exists())
 	{
-		fragmentShader = new QOpenGLShader(QOpenGLShader::Fragment);
-		if (fragmentShader->compileSourceFile(fragmentShaderPath))
-			shaderProgram->addShader(fragmentShader);
+		fragmentS = new QOpenGLShader(QOpenGLShader::Fragment);
+		if (fragmentS->compileSourceFile(fragmentShaderPath))
+			shaderP->addShader(fragmentS);
 		else
-			qWarning() << "fragment Shader Error " << fragmentShader->log();
+			qWarning() << "fragment Shader Error " << fragmentS->log();
 	}
 	else
 		qDebug() << fragmentShaderFile.filePath() << " can't be found";
-	shaderProgram->link();
+	shaderP->link();
 }

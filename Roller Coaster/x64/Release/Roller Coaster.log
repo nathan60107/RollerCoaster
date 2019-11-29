@@ -1,4 +1,3 @@
-﻿  myTriangle.cpp
-e:\systemfile\desktop\貝果的家\碩一\圖學\project3\rollercoaster\roller coaster\mytriangle.cpp(84): warning C4477: 'printf' : 格式字串 '%s' 需要 'char *' 類型的引數，但 variadic 引數 1 的類型為 'std::string'
-e:\systemfile\desktop\貝果的家\碩一\圖學\project3\rollercoaster\roller coaster\mytriangle.cpp(84): warning C4477: 'printf' : 格式字串 '%s' 需要 'char *' 類型的引數，但 variadic 引數 2 的類型為 'std::string'
+﻿  heightMap.cpp
+e:\systemfile\desktop\貝果的家\碩一\圖學\project3\rollercoaster\roller coaster\heightmap.cpp(40): warning C4838: 從 'float' 到 'int' 的轉換必須是縮小轉換
   Roller Coaster.vcxproj -> E:\SystemFile\Desktop\貝果的家\碩一\圖學\Project3\RollerCoaster\x64\Release\Roller Coaster.exe

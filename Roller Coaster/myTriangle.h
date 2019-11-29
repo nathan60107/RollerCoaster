@@ -9,32 +9,43 @@
 #include <QDebug>
 #include <QString>
 #include <QtGui/qimage.h>
+#include <time.h>
 
 
 class myTriangle
 {
 public:
-	QOpenGLShaderProgram* shaderProgram;
-	QOpenGLShader* vertexShader;
-	QOpenGLShader* fragmentShader;
+	QOpenGLShaderProgram* mountainShaderProgram;
+	QOpenGLShader* mountainVertexShader;
+	QOpenGLShader* mountainFragmentShader;
+	QOpenGLVertexArrayObject mountainVao;
+	QOpenGLBuffer vvbo;
+	
+	QOpenGLShaderProgram* waterShaderProgram;
+	QOpenGLShader* waterVertexShader;
+	QOpenGLShader* waterFragmentShader;
+	QOpenGLVertexArrayObject waterVao;
+	QOpenGLBuffer waterVbo;
+
 	QVector<QVector3D> vertices;
 	QVector<QVector2D> textureCord;
-	QOpenGLVertexArrayObject vao;
-	QOpenGLBuffer vvbo;
-	QOpenGLBuffer cvbo;
 	QOpenGLBuffer tvbo;
-	int t = 0;
+	float t = 0;
+	int triangleCount;
+	int waterCount;
+	int textureCount;
+	int waterHeight;
 
 public:
 	myTriangle();
-	void Init();
 	void InitVAO();
 	void InitVBO();
-	void InitShader(QString vertexShaderPath, QString fragmentShaderPath);
-	void Paint(GLfloat* ProjectionMatrix, GLfloat* ModelViewMatrix, QVector3D eyeDir);
-	void End();
+	void InitShader(QString vertexShaderPath, QString fragmentShaderPath, bool isWater);
+	void PaintMountain(GLfloat* ProjectionMatrix, GLfloat* ModelViewMatrix, QVector3D eyeDir);
+	void PaintWater(GLfloat * ProjectionMatrix, GLfloat * ModelViewMatrix, QVector3D eyeDir);
+	void End(bool isWater);
 	void DimensionTransformation(GLfloat source[], GLfloat target[][4]);
-	void Begin();
+	void Begin(bool isWater);
 };
 
 //Reference:http://www.jayconrod.com/posts/34/water-simulation-in-glsl
