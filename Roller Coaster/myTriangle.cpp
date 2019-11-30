@@ -1,8 +1,6 @@
 #include "myTriangle.h"
 #include "heightMap.h"
 #define M_PI 3.14159
-//#include <QtDataVisualization/QHeightMapSurfaceDataProxy>
-//#include <QHeightMapSurfaceDataProxy>
 
 myTriangle::myTriangle()
 {
@@ -20,11 +18,6 @@ void myTriangle::DimensionTransformation(GLfloat source[], GLfloat target[][4])
 }
 void myTriangle::Begin(bool isWater)
 {
-	//Bind the shader we want to draw with
-	/*shaderProgram->bind();
-	//Bind the VAO we want to draw
-	vao.bind();*/
-
 	if (isWater) {
 		waterShaderProgram->bind();
 		waterVao.bind();
@@ -141,12 +134,6 @@ void myTriangle::PaintWater(GLfloat* ProjectionMatrix, GLfloat* ModelViewMatrix,
 }
 void myTriangle::End(bool isWater)
 {
-	//Disable Attribute 0&1
-	/*shaderProgram->disableAttributeArray(0);
-
-	vao.release();
-	shaderProgram->release();*/
-
 	if (isWater) {
 		waterShaderProgram->disableAttributeArray(0);
 		waterVao.release();
@@ -161,11 +148,6 @@ void myTriangle::End(bool isWater)
 }
 void myTriangle::InitVAO()
 {
-	// Create Vertex Array Object
-	/*vao.create();
-	// Bind the VAO so it is the current active VAO
-	vao.bind();*/
-
 	mountainVao.create();
 	mountainVao.bind();
 

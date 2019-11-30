@@ -1,3 +1,8 @@
-﻿  heightMap.cpp
-e:\systemfile\desktop\貝果的家\碩一\圖學\project3\rollercoaster\roller coaster\heightmap.cpp(40): warning C4838: 從 'float' 到 'int' 的轉換必須是縮小轉換
+﻿  moc_AppMain.cpp
+  moc_TrainView.cpp
+  AppMain.cpp
+  TrainView.cpp
+  main.cpp
+  skybox.cpp
+  正在產生程式碼...
   Roller Coaster.vcxproj -> E:\SystemFile\Desktop\貝果的家\碩一\圖學\Project3\RollerCoaster\x64\Release\Roller Coaster.exe

@@ -13,6 +13,7 @@
 #include "Square.h"
 #include "myTriangle.h"
 #include "Model.h"
+#include "skybox.h"
 
 class AppMain;
 class CTrack;
@@ -57,6 +58,7 @@ public:
 	float calcNik(int i, int k, float u, vector<float> T);
 	void drawTrain(float);
 	void drawWood(Pnt3f rail, Pnt3f side, Pnt3f pos, bool doingShadows);
+	void iniSkybox();
 
 public:
 	ArcBallCam		arcball;			// keep an ArcBall for the UI
@@ -76,6 +78,13 @@ public:
 	QVector<QOpenGLTexture*> Textures;
 	Model *train;
 	float t_time;
+
+	//skybox
+	//QOpenGLShaderProgram skybox;
+	QOpenGLTexture *cubemapTexture;
+	QOpenGLBuffer skybuffer;
+	QBasicTimer mTimer;
+	Skybox *skybox;
 
 	unsigned int DIVIDE_LINE = 20;
 	float percent;
