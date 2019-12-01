@@ -1,8 +1,8 @@
 #include "Skybox.h"
 
-Skybox::Skybox()
+Skybox::Skybox(int tIndex) :textureIndex(tIndex)
 {
-}
+}	
 void Skybox::DimensionTransformation(GLfloat source[], GLfloat target[][4])
 {
 	//for uniform value, transfer 1 dimension to 2 dimension
@@ -14,16 +14,16 @@ void Skybox::DimensionTransformation(GLfloat source[], GLfloat target[][4])
 			i++;
 		}
 }
-
-void Skybox::Begin() {
+void Skybox::Paint(GLfloat* ProjectionMatrix, GLfloat* ModelViewMatrix, QVector3D eyePos)
+{
 	//Bind the shader we want to draw with
 	shaderProgram->bind();
 	//Bind the VAO we want to draw
 	vao.bind();
-}
 
-void Skybox::Paint(GLfloat* ProjectionMatrix, GLfloat* ModelViewMatrix, int textureIndex)
-{
+	texture->bind();
+	shaderProgram->setUniformValue("uTexture", textureIndex);
+
 	GLfloat P[4][4];
 	GLfloat MV[4][4];
 	DimensionTransformation(ProjectionMatrix, P);
@@ -32,6 +32,8 @@ void Skybox::Paint(GLfloat* ProjectionMatrix, GLfloat* ModelViewMatrix, int text
 	shaderProgram->setUniformValue("ProjectionMatrix", P);
 	//pass modelview matrix to shader
 	shaderProgram->setUniformValue("ModelViewMatrix", MV);
+
+	shaderProgram->setUniformValue("eyePos", eyePos);
 
 	// Bind the buffer so that it is the current active buffer
 	vvbo.bind();
@@ -44,14 +46,7 @@ void Skybox::Paint(GLfloat* ProjectionMatrix, GLfloat* ModelViewMatrix, int text
 
 	//Draw triangles with 4 indices starting from the 0th index
 	glDrawArrays(GL_TRIANGLES, 0, vertices.size());
-}
-void Skybox::iniTex(int j) {
-	//tttt = new int();
-	//*tttt = j;
-	//printf("%f", *tttt);
-}
 
-void Skybox::End() {
 	//Disable Attribute 0&1
 	shaderProgram->disableAttributeArray(0);
 
@@ -63,7 +58,7 @@ void Skybox::Init()
 	InitShader("../../Shader/skybox.vs", "../../Shader/skybox.fs");
 	InitVAO();
 	InitVBO();
-	//InitTexture();
+	InitTexture();
 }
 void Skybox::InitVAO()
 {
@@ -154,4 +149,39 @@ void Skybox::InitShader(QString vertexShaderPath, QString fragmentShaderPath)
 	else
 		qDebug() << fragmentShaderFile.filePath() << " can't be found";
 	shaderProgram->link();
+}
+void Skybox::InitTexture() {
+	QImage posx = QImage("../../Textures/lostvalley_west.bmp").convertToFormat(QImage::Format_RGBA8888);;
+	QImage posy = QImage("../../Textures/lostvalley_up.bmp").convertToFormat(QImage::Format_RGBA8888);;
+	QImage posz = QImage("../../Textures/lostvalley_south.bmp").convertToFormat(QImage::Format_RGBA8888);;
+	QImage negx = QImage("../../Textures/lostvalley_east.bmp").convertToFormat(QImage::Format_RGBA8888);;
+	QImage negy = QImage("../../Textures/lostvalley_down.bmp").convertToFormat(QImage::Format_RGBA8888);;
+	QImage negz = QImage("../../Textures/lostvalley_north.bmp").convertToFormat(QImage::Format_RGBA8888);;
+
+	texture = new QOpenGLTexture(QOpenGLTexture::TargetCubeMap);
+	texture->create();
+	texture->setSize(posx.width(), posx.height(), posx.depth());
+	texture->setFormat(QOpenGLTexture::RGBA8_UNorm);
+	texture->allocateStorage();
+	texture->setData(0, 0, QOpenGLTexture::CubeMapPositiveX,
+		QOpenGLTexture::RGBA, QOpenGLTexture::UInt8,
+		(const void*)posx.constBits(), 0);
+	texture->setData(0, 0, QOpenGLTexture::CubeMapPositiveY,
+		QOpenGLTexture::RGBA, QOpenGLTexture::UInt8,
+		(const void*)posy.constBits(), 0);
+	texture->setData(0, 0, QOpenGLTexture::CubeMapPositiveZ,
+		QOpenGLTexture::RGBA, QOpenGLTexture::UInt8,
+		(const void*)posz.constBits(), 0);
+	texture->setData(0, 0, QOpenGLTexture::CubeMapNegativeX,
+		QOpenGLTexture::RGBA, QOpenGLTexture::UInt8,
+		(const void*)negx.constBits(), 0);
+	texture->setData(0, 0, QOpenGLTexture::CubeMapNegativeY,
+		QOpenGLTexture::RGBA, QOpenGLTexture::UInt8,
+		(const void*)negy.constBits(), 0);
+	texture->setData(0, 0, QOpenGLTexture::CubeMapNegativeZ,
+		QOpenGLTexture::RGBA, QOpenGLTexture::UInt8,
+		(const void*)negz.constBits(), 0);
+	texture->setWrapMode(QOpenGLTexture::ClampToEdge);
+	texture->setMinificationFilter(QOpenGLTexture::LinearMipMapLinear);
+	texture->setMagnificationFilter(QOpenGLTexture::LinearMipMapLinear);
 }

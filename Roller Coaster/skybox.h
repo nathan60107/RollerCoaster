@@ -21,24 +21,21 @@ public:
 	QOpenGLShader* vertexShader;
 	QOpenGLShader* fragmentShader;
 	QOpenGLTexture *texture;
+	GLuint textureIndex = 2;
 	QVector<QVector3D> vertices;
 	QVector<QVector2D> uvs;
 	QOpenGLVertexArrayObject vao;
 	QOpenGLBuffer vvbo;
 	QOpenGLBuffer uvbo;
 
-	GLuint textureIndex = 2;
-	int *tttt;
 public:
-	Skybox();
+	Skybox(int tIndex);
 	void Init();
 	void InitVAO();
 	void InitVBO();
+	void InitTexture();
 	void InitShader(QString vertexShaderPath, QString fragmentShaderPath);
 	void DimensionTransformation(GLfloat source[], GLfloat target[][4]);
-	void Begin();
-	void Paint(GLfloat* ProjectionMatrix, GLfloat* ModelViewMatrix, int textureIndex);
-	void iniTex(int j);
-	void End();
+	void Paint(GLfloat* ProjectionMatrix, GLfloat* ModelViewMatrix, QVector3D eyePos);
 };
 //結果是mvp順序寫錯 為什麼不能傳int進去改變數？

@@ -1,12 +1,9 @@
 #version 430 core
 const float pi = 3.14159;
-/*const float period = 100.0;
-const float amplitude = 5.0;*/
 
 layout(location = 0) in vec3 vertex;
 //layout(location = 1) in vec3 normal;
 
-out vec2 uv;
 out vec3 position;
 out vec3 worldNormal;
 out vec3 eyeNormal;

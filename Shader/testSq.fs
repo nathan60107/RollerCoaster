@@ -10,8 +10,6 @@ out vec4 color;
 uniform vec3 eyePos;
 uniform samplerCube envMap;
 
-uniform sampler2D Texture;
-
 void main() {
      vec3 eye = normalize(eyePos - position);
      vec3 r = reflect(eye, worldNormal);

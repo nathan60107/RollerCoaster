@@ -20,18 +20,18 @@ void TrainView::initializeGL()
 	square = new Square();
 	//Initialize the square object
 	square->Init();
-	//Initialize texture 
-	initializeTexture();
 
-	//change part
 	test = new myTriangle();
 	test->InitShader("../../Shader/mountain.vs", "../../Shader/mountain.fs", false);
 	test->InitShader("../../Shader/testSq.vs", "../../Shader/testSq.fs", true);
 	test->InitVAO();
 	test->InitVBO();
-	
-	skybox = new Skybox();
+
+	skybox = new Skybox(2);
 	skybox->Init();
+
+	//Initialize texture 
+	initializeTexture();
 }
 void TrainView::initializeTexture()
 {
@@ -41,43 +41,8 @@ void TrainView::initializeTexture()
 	Textures.push_back(texture);
 	Textures.push_back(heightMapTexture);
 	train = new Model("../../Model/train/11709_train_v1_L3.obj", 10, Point3d(0, 0, 0));
-
-	QImage posx = QImage("../../Textures/lostvalley_west.bmp").convertToFormat(QImage::Format_RGBA8888);;
-	QImage posy = QImage("../../Textures/lostvalley_up.bmp").convertToFormat(QImage::Format_RGBA8888);;
-	QImage posz = QImage("../../Textures/lostvalley_south.bmp").convertToFormat(QImage::Format_RGBA8888);;
-	QImage negx = QImage("../../Textures/lostvalley_east.bmp").convertToFormat(QImage::Format_RGBA8888);;
-	QImage negy = QImage("../../Textures/lostvalley_down.bmp").convertToFormat(QImage::Format_RGBA8888);;
-	QImage negz = QImage("../../Textures/lostvalley_north.bmp").convertToFormat(QImage::Format_RGBA8888);;
-
-	QOpenGLTexture * cubemap = new QOpenGLTexture(QOpenGLTexture::TargetCubeMap);
-	cubemap->create();
-	cubemap->setSize(posx.width(), posx.height(), posx.depth());
-	cubemap->setFormat(QOpenGLTexture::RGBA8_UNorm);
-	cubemap->allocateStorage();
-	cubemap->setData(0, 0, QOpenGLTexture::CubeMapPositiveX,
-		QOpenGLTexture::RGBA, QOpenGLTexture::UInt8,
-		(const void*)posx.constBits(), 0);
-	cubemap->setData(0, 0, QOpenGLTexture::CubeMapPositiveY,
-		QOpenGLTexture::RGBA, QOpenGLTexture::UInt8,
-		(const void*)posy.constBits(), 0);
-	cubemap->setData(0, 0, QOpenGLTexture::CubeMapPositiveZ,
-		QOpenGLTexture::RGBA, QOpenGLTexture::UInt8,
-		(const void*)posz.constBits(), 0);
-	cubemap->setData(0, 0, QOpenGLTexture::CubeMapNegativeX,
-		QOpenGLTexture::RGBA, QOpenGLTexture::UInt8,
-		(const void*)negx.constBits(), 0);
-	cubemap->setData(0, 0, QOpenGLTexture::CubeMapNegativeY,
-		QOpenGLTexture::RGBA, QOpenGLTexture::UInt8,
-		(const void*)negy.constBits(), 0);
-	cubemap->setData(0, 0, QOpenGLTexture::CubeMapNegativeZ,
-		QOpenGLTexture::RGBA, QOpenGLTexture::UInt8,
-		(const void*)negz.constBits(), 0);
-	cubemap->setWrapMode(QOpenGLTexture::ClampToEdge);
-	cubemap->setMinificationFilter(QOpenGLTexture::LinearMipMapLinear);
-	cubemap->setMagnificationFilter(QOpenGLTexture::LinearMipMapLinear);
-
-	Textures.push_back(cubemap);
-	skybox->iniTex(2);
+	
+	Textures.push_back(skybox->texture);
 }
 
 void TrainView:: resetArcball()
@@ -188,12 +153,8 @@ void TrainView::paintGL()
 	//Get projection matrix
  	glGetFloatv(GL_PROJECTION_MATRIX,ProjectionMatrex);
 
-	skybox->Begin();
-		glActiveTexture(GL_TEXTURE2);
-		Textures[2]->bind();
-		skybox->shaderProgram->setUniformValue("uTexture", 2);
-		skybox->Paint(ProjectionMatrex,ModelViewMatrex, 2);
-	skybox->End();
+	glActiveTexture(GL_TEXTURE0 + skybox->textureIndex);
+	skybox->Paint(ProjectionMatrex,ModelViewMatrex, QVector3D(arcball.eyeX, arcball.eyeY, arcball.eyeZ));
 
 	//Call triangle's render function, pass ModelViewMatrex and ProjectionMatrex
  	triangle->Paint(ProjectionMatrex,ModelViewMatrex);
@@ -225,9 +186,9 @@ void TrainView::paintGL()
 
 	test->Begin(true);
 		//Active Texture
-		glActiveTexture(GL_TEXTURE2);
+		//glActiveTexture(GL_TEXTURE2);
 		//Bind square's texture
-		Textures[2]->bind();
+		//Textures[2]->bind();
 		//pass texture to shader
 		test->waterShaderProgram->setUniformValue("envMap", 2);
 
