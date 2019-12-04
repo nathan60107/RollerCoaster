@@ -1,0 +1,38 @@
+#version 430 core
+
+in vec4 pos;
+
+/*layout(location = 0)*/ out float fragmentdepth;
+
+
+void main(){
+	//gl_FragColor = vec4( 1, 1, 0, 1);
+	//fragmentdepth = gl_FragCoord.z;
+	fragmentdepth = gl_FragCoord.z;
+}
+
+/*
+in vec4 pos;
+ 
+vec4 pack( float depth )
+{
+    const vec4 bitSh = vec4( 256.0 * 256.0 * 256.0,
+                             256.0 * 256.0,
+                             256.0,
+                             1.0 );
+    const vec4 bitMsk = vec4( 0.0,
+                              1.0 / 256.0,
+                              1.0 / 256.0,
+                              1.0 / 256.0 );
+    vec4 comp = fract( depth * bitSh );
+    comp -= comp.xxyz * bitMsk;
+    return comp;
+}
+ 
+void main( void )
+{
+    float normalizedZ = pos.z / pos.w;
+    normalizedZ = ( normalizedZ + 1.0 ) / 2.0;
+    gl_FragColor = pack( normalizedZ );
+	//gl_FragColor = vec4(1,1,1,1);
+}*/

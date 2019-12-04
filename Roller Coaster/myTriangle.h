@@ -3,6 +3,7 @@
 #include <QtGui/QOpenGLBuffer>
 #include <QtGui/QOpenGLShader>
 #include <QtGui/QOpenGLShaderProgram>
+#include <QtGui/qopenglframebufferobject>
 #include <QVector>
 #include <QVector3D>
 #include <QFileInfo>
@@ -10,6 +11,9 @@
 #include <QString>
 #include <QtGui/qimage.h>
 #include <time.h>
+
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 
 class myTriangle
@@ -27,6 +31,12 @@ public:
 	QOpenGLVertexArrayObject waterVao;
 	QOpenGLBuffer waterVbo;
 
+	QOpenGLShaderProgram* depthShaderProgram;
+	QOpenGLShader* depthVertexShader;
+	QOpenGLShader* depthFragmentShader;
+	QOpenGLVertexArrayObject depthVao;
+	//QOpenGLFramebufferObject frameBuffer;
+
 	QVector<QVector3D> vertices;
 	QVector<QVector2D> textureCord;
 	QOpenGLBuffer tvbo;
@@ -40,12 +50,15 @@ public:
 	myTriangle();
 	void InitVAO();
 	void InitVBO();
-	void InitShader(QString vertexShaderPath, QString fragmentShaderPath, bool isWater);
+	void InitShader(QString vertexShaderPath, QString fragmentShaderPath, int mode);
 	void PaintMountain(GLfloat* ProjectionMatrix, GLfloat* ModelViewMatrix, QVector3D eyeDir);
+	void PaintMountainShadow(GLfloat* ProjectionMatrix, GLfloat* ModelViewMatrix, QOpenGLShaderProgram *sp);
 	void PaintWater(GLfloat * ProjectionMatrix, GLfloat * ModelViewMatrix, QVector3D eyeDir);
-	void End(bool isWater);
-	void DimensionTransformation(GLfloat source[], GLfloat target[][4]);
-	void Begin(bool isWater);
+	void End(int mode);
+	void static matrixFormat(GLfloat source[], GLfloat target[][4]);
+	void static matrixFormat(QMatrix4x4 source, GLfloat target[][4]);
+	void Begin(int mode);
 };
 
 //Reference:http://www.jayconrod.com/posts/34/water-simulation-in-glsl
+//Ãö©óVAO VBO:https://www.photoneray.com/opengl-vao-vbo/

@@ -5,7 +5,7 @@
 myTriangle::myTriangle()
 {
 }
-void myTriangle::DimensionTransformation(GLfloat source[], GLfloat target[][4])
+void myTriangle::matrixFormat(GLfloat source[], GLfloat target[][4])
 {
 	//for uniform value, transfer 1 dimension to 2 dimension
 	int i = 0;
@@ -16,9 +16,24 @@ void myTriangle::DimensionTransformation(GLfloat source[], GLfloat target[][4])
 			i++;
 		}
 }
-void myTriangle::Begin(bool isWater)
+void myTriangle::matrixFormat(QMatrix4x4 source, GLfloat target[][4])
 {
-	if (isWater) {
+	//for uniform value, transfer 1 dimension to 2 dimension
+	int i = 0;
+	for (int j = 0; j < 4; j++)
+		for (int k = 0; k < 4; k++)
+		{
+			target[j][k] = source.data()[k*4+j];
+			//printf("%f %f\n", target[j][k], source.data()[i]);
+			i++;
+		}//printf("\n");
+}
+void myTriangle::Begin(int mode)
+{
+	/*if (mode == 2) {
+		depthShaderProgram->bind();
+		depthVao.bind();
+	}else */if (mode==1) {
 		waterShaderProgram->bind();
 		waterVao.bind();
 	} else{
@@ -56,8 +71,8 @@ void myTriangle::PaintMountain(GLfloat* ProjectionMatrix, GLfloat* ModelViewMatr
 {
 	GLfloat P[4][4];
 	GLfloat MV[4][4];
-	DimensionTransformation(ProjectionMatrix, P);
-	DimensionTransformation(ModelViewMatrix, MV);
+	matrixFormat(ProjectionMatrix, P);
+	matrixFormat(ModelViewMatrix, MV);
 
 	//pass projection matrix to shader
 	mountainShaderProgram->setUniformValue("ProjectionMatrix", P);
@@ -86,12 +101,72 @@ void myTriangle::PaintMountain(GLfloat* ProjectionMatrix, GLfloat* ModelViewMatr
 	//Draw a myTriangle with 3 indices starting from the 0th index
 	glDrawArrays(GL_TRIANGLES, 0, triangleCount);
 }
+void myTriangle::PaintMountainShadow(GLfloat* ProjectionMatrix, GLfloat* ModelViewMatrix, QOpenGLShaderProgram *sp)
+{
+	//sp->bind();
+
+	depthVao.bind();
+
+	/*GLfloat P[4][4];
+	GLfloat MV[4][4];
+	matrixFormat(ProjectionMatrix, P);
+	matrixFormat(ModelViewMatrix, MV);
+
+	for (int i = 0; i < 4; i++) {
+		for (int j = 0; j < 4; j++) {
+			printf("%f ", MV[i][j]);
+		}printf("\n");
+	}
+
+	QMatrix4x4 PPPP(ProjectionMatrix);
+	matrixFormat(PPPP, P);
+
+	for (int i = 0; i < 4; i++) {
+		for (int j = 0; j < 4; j++) {
+			printf("%f ", P[i][j]);
+		}printf("\n");
+	}
+
+	GLfloat SSR[4][4];
+	for (int i = 0; i < 4; i++) {
+		for (int j = 0; j < 4; j++) {
+			float aa = 0;
+			for (int k = 0; k < 4; k++) {
+				aa += P[i][k] * MV[k][j];
+			}
+			SSR[i][j] = aa;
+			//MV[i][j] = (i == j ? 1 : 0);
+			printf("%f ", aa);
+		}printf("\n");
+	}
+
+	sp->setUniformValue("ProjectionMatrix", QMatrix4x4(ProjectionMatrix).transposed());
+	sp->setUniformValue("ModelViewMatrix", QMatrix4x4(ModelViewMatrix).transposed());*/
+
+	// Bind the buffer so that it is the current active buffer.
+	vvbo.bind();
+	// Enable Attribute 0
+	sp->enableAttributeArray(0);
+	// Set Attribute 0 to be position
+	sp->setAttributeArray(0, GL_FLOAT, 0, 3, NULL);
+	//unbind buffer
+	vvbo.release();
+
+	//Draw a myTriangle with 3 indices starting from the 0th index
+	glDrawArrays(GL_TRIANGLES, 0, triangleCount);
+
+	sp->disableAttributeArray(0);
+
+	depthVao.release();
+
+	sp->release();
+}
 void myTriangle::PaintWater(GLfloat* ProjectionMatrix, GLfloat* ModelViewMatrix, QVector3D eyeDir)
 {
 	GLfloat P[4][4];
 	GLfloat MV[4][4];
-	DimensionTransformation(ProjectionMatrix, P);
-	DimensionTransformation(ModelViewMatrix, MV);
+	matrixFormat(ProjectionMatrix, P);
+	matrixFormat(ModelViewMatrix, MV);
 
 	//pass projection matrix to shader
 	waterShaderProgram->setUniformValue("ProjectionMatrix", P);
@@ -132,9 +207,13 @@ void myTriangle::PaintWater(GLfloat* ProjectionMatrix, GLfloat* ModelViewMatrix,
 	//Draw a myTriangle with 3 indices starting from the 0th index
 	glDrawArrays(GL_TRIANGLES, 0, waterCount);
 }
-void myTriangle::End(bool isWater)
+void myTriangle::End(int mode)
 {
-	if (isWater) {
+	/*if (mode == 2) {
+		depthShaderProgram->disableAttributeArray(0);
+		depthVao.release();
+		depthShaderProgram->release();
+	}else */if (mode == 1) {
 		waterShaderProgram->disableAttributeArray(0);
 		waterVao.release();
 		waterShaderProgram->release();
@@ -153,6 +232,9 @@ void myTriangle::InitVAO()
 
 	waterVao.create();
 	waterVao.bind();
+
+	depthVao.create();
+	depthVao.bind();
 }
 void myTriangle::InitVBO()
 {
@@ -185,11 +267,12 @@ void myTriangle::InitVBO()
 	waterVbo.setUsagePattern(QOpenGLBuffer::StaticDraw);
 	waterVbo.allocate(hm.water_verticesVbo.constData(), hm.water_verticesVbo.size() * sizeof(QVector3D));
 }
-void myTriangle::InitShader(QString vertexShaderPath, QString fragmentShaderPath, bool isWater)
+void myTriangle::InitShader(QString vertexShaderPath, QString fragmentShaderPath, int mode)
 {
-	auto &shaderP = (isWater ? waterShaderProgram : mountainShaderProgram);
-	auto &vertexS = (isWater ? waterVertexShader : mountainVertexShader),
-		&fragmentS = (isWater ? waterFragmentShader : mountainFragmentShader);
+	//mode 2: shadow, mode 1: water, mode 0: mountain
+	auto &shaderP = (mode == 2 ? depthShaderProgram : (mode == 1 ? waterShaderProgram : mountainShaderProgram));
+	auto &vertexS = (mode == 2 ? depthVertexShader : (mode == 1 ? waterVertexShader : mountainVertexShader)),
+		&fragmentS = (mode == 2 ? depthFragmentShader : (mode == 1 ? waterFragmentShader : mountainFragmentShader));
 
 	// Create Shader
 	shaderP = new QOpenGLShaderProgram();

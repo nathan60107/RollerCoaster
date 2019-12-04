@@ -38,4 +38,4 @@ public:
 	void DimensionTransformation(GLfloat source[], GLfloat target[][4]);
 	void Paint(GLfloat* ProjectionMatrix, GLfloat* ModelViewMatrix, QVector3D eyePos);
 };
-//結果是mvp順序寫錯 為什麼不能傳int進去改變數？
+//Reference:https://amin-ahmadi.com/2019/07/28/creating-a-skybox-using-c-qt-and-opengl/

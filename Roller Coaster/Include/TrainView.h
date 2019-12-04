@@ -58,7 +58,7 @@ public:
 	float calcNik(int i, int k, float u, vector<float> T);
 	void drawTrain(float);
 	void drawWood(Pnt3f rail, Pnt3f side, Pnt3f pos, bool doingShadows);
-	void iniSkybox();
+	void initDepth();
 
 public:
 	ArcBallCam		arcball;			// keep an ArcBall for the UI
@@ -79,12 +79,21 @@ public:
 	Model *train;
 	float t_time;
 
-	//skybox
+	/*//skybox
 	//QOpenGLShaderProgram skybox;
 	QOpenGLTexture *cubemapTexture;
 	QOpenGLBuffer skybuffer;
-	QBasicTimer mTimer;
+	QBasicTimer mTimer;*/
 	Skybox *skybox;
+
+	//shadow
+	QOpenGLFramebufferObject *frameBuffer;
+	QOpenGLShaderProgram* depthShaderProgram;
+	QOpenGLShader* depthVertexShader;
+	QOpenGLShader* depthFragmentShader;
+	QOpenGLVertexArrayObject depthVao;
+	bool save = true;
+	float gg = 0;
 
 	unsigned int DIVIDE_LINE = 20;
 	float percent;

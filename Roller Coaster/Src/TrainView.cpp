@@ -22,8 +22,8 @@ void TrainView::initializeGL()
 	square->Init();
 
 	test = new myTriangle();
-	test->InitShader("../../Shader/mountain.vs", "../../Shader/mountain.fs", false);
-	test->InitShader("../../Shader/testSq.vs", "../../Shader/testSq.fs", true);
+	test->InitShader("../../Shader/mountain with shadow.vs", "../../Shader/mountain with shadow.fs", 0);
+	test->InitShader("../../Shader/testSq.vs", "../../Shader/testSq.fs", 1);
 	test->InitVAO();
 	test->InitVBO();
 
@@ -43,6 +43,8 @@ void TrainView::initializeTexture()
 	train = new Model("../../Model/train/11709_train_v1_L3.obj", 10, Point3d(0, 0, 0));
 	
 	Textures.push_back(skybox->texture);
+
+	initDepth();
 }
 
 void TrainView:: resetArcball()
@@ -56,6 +58,82 @@ void TrainView:: resetArcball()
 
 void TrainView::paintGL()
 {
+	//glActiveTexture(GL_TEXTURE0 + frameBuffer->texture());
+	//glBindTexture(GL_TEXTURE_2D, frameBuffer->texture());
+	frameBuffer->bind();
+	//glViewport(0, 0, 1024, 1024);
+	glViewport(0, 0, width(), height());
+	//glEnable(GL_CULL_FACE);
+	//glCullFace(GL_BACK);
+
+	glClearColor(1, 1, 1, 0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	
+	//Get modelview matrix
+	glGetFloatv(GL_MODELVIEW_MATRIX, ModelViewMatrex);
+	//Get projection matrix
+	glGetFloatv(GL_PROJECTION_MATRIX, ProjectionMatrex);
+
+	QVector3D lightInvDir(0, 20, 20); //gg += 0.01;
+	QMatrix4x4  depthProjectionMatrix(ProjectionMatrex), depthViewMatrix(ModelViewMatrex), depthModelMatrix, depthMVP;
+	double aspect = (width() / height());
+	//depthModelMatrix.perspective(arcball.fieldOfView, aspect, .1, 1000);
+	//depthViewMatrix.setToIdentity();
+	//depthModelMatrix.setToIdentity();
+	//depthModelMatrix.translate(-arcball.eyeX, -arcball.eyeY, -arcball.eyeZ);
+
+	/*depthProjectionMatrix.setToIdentity();
+	depthProjectionMatrix.ortho(-10, 10, -10, 10, -10, 20);
+	depthViewMatrix.setToIdentity();
+	depthViewMatrix.lookAt(lightInvDir, QVector3D(0, 0, 0), QVector3D(1, 0, 0));
+	depthModelMatrix.setToIdentity();*/
+
+	//QVector3D LID(0.5, 2, 2), lightPos(5, 20, 20);
+	//depthProjectionMatrix.perspective(40, aspect, 2, 50);
+	//depthViewMatrix.lookAt(lightPos, LID, QVector3D(0, 1, 0));
+	//depthModelMatrix.setToIdentity();
+
+	
+	depthMVP = depthProjectionMatrix * depthViewMatrix * depthModelMatrix;
+	//depthMVP = depthProjectionMatrix * depthViewMatrix;
+
+	/*GLfloat SSR[4][4];
+	for (int i = 0; i < 4; i++) {
+		for (int j = 0; j < 4; j++) {
+			/*float aa = 0;
+			for (int k = 0; k < 4; k++) {
+				aa += ProjectionMatrex[i * 4 + k] * ModelViewMatrex[k * 4 + j];
+			}
+			SSR[i][j] = aa;
+			printf("%f ", depthMVP.data()[j * 4 + i]);
+		}printf("\n");
+	}*/
+
+	depthShaderProgram->bind();
+	//depthShaderProgram->setUniformValue("depthMVP", depthMVP);
+	depthShaderProgram->setUniformValue("ProjectionMatrix",depthProjectionMatrix.transposed());
+	depthShaderProgram->setUniformValue("ModelViewMatrix", depthViewMatrix.transposed());
+	//test->PaintMountainShadow(depthMVP.transposed(), depthShaderProgram);
+	test->PaintMountainShadow(ProjectionMatrex, ModelViewMatrex, depthShaderProgram);
+
+	auto FBOtext = frameBuffer->texture();
+	//printf("%d\n", FBOtext);
+	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	if (save) {
+		QImage FBOimg = frameBuffer->toImage();
+		FBOimg.save("FBO.BMP");
+		//save = 0;
+	}
+	frameBuffer->release();
+	glActiveTexture(GL_TEXTURE0 + FBOtext);
+	glBindTexture(GL_TEXTURE_2D, FBOtext);
+	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	/*glPointSize(10);
+	glBegin(GL_POINT);
+	glVertex3f(0, -20, 0);
+	glEnd();*/
+
 
 	//*********************************************************************
 	//
@@ -149,9 +227,11 @@ void TrainView::paintGL()
 	}
 
 	//Get modelview matrix
- 	glGetFloatv(GL_MODELVIEW_MATRIX,ModelViewMatrex);
+ 	glGetFloatv(GL_MODELVIEW_MATRIX, ModelViewMatrex);
 	//Get projection matrix
- 	glGetFloatv(GL_PROJECTION_MATRIX,ProjectionMatrex);
+ 	glGetFloatv(GL_PROJECTION_MATRIX, ProjectionMatrex);
+
+	//QMatrix4x4(ModelViewMatrex);
 
 	glActiveTexture(GL_TEXTURE0 + skybox->textureIndex);
 	skybox->Paint(ProjectionMatrex,ModelViewMatrex, QVector3D(arcball.eyeX, arcball.eyeY, arcball.eyeZ));
@@ -171,7 +251,16 @@ void TrainView::paintGL()
 		square->Paint(ProjectionMatrex,ModelViewMatrex);
 	square->End();
 
-	glEnable(GL_BLEND);
+
+	QMatrix4x4 biasMatrix(
+		0.5, 0.0, 0.0, 0.0,
+		0.0, 0.5, 0.0, 0.0,
+		0.0, 0.0, 0.5, 0.0,
+		0.5, 0.5, 0.5, 1.0
+	);
+	//QMatrix4x4 depthBiasMVP = /*biasMatrix **/ depthMVP;
+
+	
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	test->Begin(false);
 		//Active Texture
@@ -180,10 +269,13 @@ void TrainView::paintGL()
 		Textures[1]->bind();
 		//pass texture to shader
 		test->mountainShaderProgram->setUniformValue("Texture", 1);
+		//test->mountainShaderProgram->setUniformValue("DepthBiasMVP", depthMVP);
+		//test->mountainShaderProgram->setUniformValue("shadowMap", frameBuffer->texture());
 
 		test->PaintMountain(ProjectionMatrex, ModelViewMatrex, QVector3D(arcball.eyeX, arcball.eyeY, arcball.eyeZ));
 	test->End(false);
-
+	
+	glEnable(GL_BLEND);
 	test->Begin(true);
 		//Active Texture
 		//glActiveTexture(GL_TEXTURE2);
@@ -283,6 +375,45 @@ void TrainView::drawWood(Pnt3f rail, Pnt3f side, Pnt3f pos, bool doingShadows) {
 		glVertex3f(wood.x, wood.y, wood.z);
 	}
 	glEnd();
+}
+
+void TrainView::initDepth()
+{
+	//frameBuffer = new QOpenGLFramebufferObject(1024, 1024, QOpenGLFramebufferObject::Depth);
+	frameBuffer = new QOpenGLFramebufferObject(width(), height(), QOpenGLFramebufferObject::Depth);
+
+	/*depthVao.create();
+	depthVao.bind();*/
+
+	QString vertexShaderPath("../../Shader/depth.vs"),
+			fragmentShaderPath("../../Shader/depth.fs");
+
+	// Create Shader
+	depthShaderProgram = new QOpenGLShaderProgram();
+	QFileInfo  vertexShaderFile(vertexShaderPath);
+	if (vertexShaderFile.exists())
+	{
+		depthVertexShader = new QOpenGLShader(QOpenGLShader::Vertex);
+		if (depthVertexShader->compileSourceFile(vertexShaderPath))
+			depthShaderProgram->addShader(depthVertexShader);
+		else
+			qWarning() << "Vertex Shader Error " << depthVertexShader->log();
+	}
+	else
+		qDebug() << vertexShaderFile.filePath() << " can't be found";
+
+	QFileInfo  fragmentShaderFile(fragmentShaderPath);
+	if (fragmentShaderFile.exists())
+	{
+		depthFragmentShader = new QOpenGLShader(QOpenGLShader::Fragment);
+		if (depthFragmentShader->compileSourceFile(fragmentShaderPath))
+			depthShaderProgram->addShader(depthFragmentShader);
+		else
+			qWarning() << "fragment Shader Error " << depthFragmentShader->log();
+	}
+	else
+		qDebug() << fragmentShaderFile.filePath() << " can't be found";
+	depthShaderProgram->link();
 }
 
 //************************************************************************
