@@ -10,11 +10,6 @@ void main(){
 	fragmentdepth = gl_FragCoord.z;
 	//fragmentdepth = gl_FragDepth;
 	//gl_FragDepth = gl_FragCoord.z;
-	/*if(gl_FragCoord.x>450){
-		fragmentdepth = 0.8;
-	}else{
-		fragmentdepth = 0.2;
-	}*/	
 }
 
 /*

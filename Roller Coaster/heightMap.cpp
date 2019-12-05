@@ -1,6 +1,8 @@
 #include "heightMap.h"
 
 heightMap::heightMap(QString path, int size, int baseHeight, float waterH):waterHeight(waterH){
+	printf("Building height map...\n");
+
 	heightMapImage = QImage("../../Textures/heightmap.jpg");
 
 	for (int i = 0; i <= size; i++){
@@ -12,7 +14,7 @@ heightMap::heightMap(QString path, int size, int baseHeight, float waterH):water
 			vertices << QVector3D(i - size / 2, baseHeight * height / 255.0 * 2, j - size / 2);//dimension = (size+1)^2
 		}
 	}
-	printf("ver size = %d\n", vertices.size());
+	//printf("ver size = %d\n", vertices.size());
 
 	for (int i = 0; i < size; i++) {
 		for (int j = 0; j < size; j++) {
@@ -20,7 +22,7 @@ heightMap::heightMap(QString path, int size, int baseHeight, float waterH):water
 			triangle << QVector3D((i + 1) * (size + 1) + j + 1, (i + 1) * (size + 1) + j, i * (size + 1) + j + 1);
 		}
 	}
-	printf("tri size = %d\n", triangle.size());
+	//printf("tri size = %d\n", triangle.size());
 	
 	normal.resize(vertices.size());
 	for (int i = 0; i < triangle.size(); i++) {
@@ -68,5 +70,5 @@ void heightMap::generateWater()
 
 		NEXT:;
 	}
-	printf("water ver size = %d\n", water_verticesVbo.size()/3);
+	//printf("water ver size = %d\n", water_verticesVbo.size()/3);
 }

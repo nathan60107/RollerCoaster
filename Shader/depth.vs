@@ -27,4 +27,5 @@ void main( void )
     vec3 finalPosition = vertexPosition_modelspace;
     pos = ProjectionMatrix * ModelViewMatrix * vec4( finalPosition, 1.0 );
     gl_Position = pos;
-}*/
+}
+*/

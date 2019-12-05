@@ -1,13 +1,50 @@
 #version 330 core
 
+in vec2 texCord;
+in vec4 ShadowCoord;
 
+out vec4 fColor;
+
+uniform sampler2D Texture;
+uniform sampler2D shadowMap;
+
+float ShadowCalculation(vec4 fragPosLightSpace)
+{
+    // 執行透視除法
+    vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
+    // 變換到[0,1]的範圍
+    projCoords = projCoords * 0.5 + 0.5;
+    // 取得最近點的深度(使用[0,1]範圍下的fragPosLight當坐標)
+    float closestDepth = texture(shadowMap, projCoords.xy).r; 
+    // 取得當前片元在光源視角下的深度
+    float currentDepth = projCoords.z;
+    // 檢查當前片元是否在陰影中
+	float bias = 0.005;
+    float shadow = currentDepth > closestDepth + bias ? 0.8 : 0.0;
+
+    return shadow;
+}
+
+void main()
+{           
+    vec3 color = texture(Texture, texCord).rgb;
+    
+    // 計算陰影
+    float shadow = ShadowCalculation(ShadowCoord);       
+    vec3 lighting = (1.0 - shadow) * color;    
+
+    fColor = vec4(lighting, 1.0f);
+}
+
+
+/*
 in vec2 texCord;
 in vec4 ShadowCoord;
 
 out vec3 fColor;
 
 uniform sampler2D Texture;
-uniform sampler2DShadow shadowMap;
+uniform sampler2D shadowMap;
 
 vec2 poissonDisk[16] = vec2[]( 
    vec2( -0.94201624, -0.39906216 ), 
@@ -30,9 +67,9 @@ vec2 poissonDisk[16] = vec2[](
 
 void main()
 {
-	//float visibility = texture( shadowMap, vec3(ShadowCoord.xy, (ShadowCoord.z)/ShadowCoord.w) );
+	float visibility = texture( shadowMap, ShadowCoord.xy ).r;
 	
-	float visibility=1.0;
+	/*float visibility=1.0;
 
 	float bias = 0.005;
 
@@ -42,7 +79,7 @@ void main()
 	}
 
 	fColor = visibility * texture(Texture, texCord).rgb;
-}
+}*/
 
 
 

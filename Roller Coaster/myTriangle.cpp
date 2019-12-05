@@ -270,6 +270,7 @@ void myTriangle::InitVBO()
 void myTriangle::InitShader(QString vertexShaderPath, QString fragmentShaderPath, int mode)
 {
 	//mode 2: shadow, mode 1: water, mode 0: mountain
+	printf("Loading shader \"%s\" & \"%s\"...\n", vertexShaderPath.toStdString().c_str(), fragmentShaderPath.toStdString().c_str());
 	auto &shaderP = (mode == 2 ? depthShaderProgram : (mode == 1 ? waterShaderProgram : mountainShaderProgram));
 	auto &vertexS = (mode == 2 ? depthVertexShader : (mode == 1 ? waterVertexShader : mountainVertexShader)),
 		&fragmentS = (mode == 2 ? depthFragmentShader : (mode == 1 ? waterFragmentShader : mountainFragmentShader));

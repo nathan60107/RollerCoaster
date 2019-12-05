@@ -151,6 +151,8 @@ void Skybox::InitShader(QString vertexShaderPath, QString fragmentShaderPath)
 	shaderProgram->link();
 }
 void Skybox::InitTexture() {
+
+	printf("Loading skybox...");
 	QImage posx = QImage("../../Textures/lostvalley_west.bmp").convertToFormat(QImage::Format_RGBA8888);;
 	QImage posy = QImage("../../Textures/lostvalley_up.bmp").convertToFormat(QImage::Format_RGBA8888);;
 	QImage posz = QImage("../../Textures/lostvalley_south.bmp").convertToFormat(QImage::Format_RGBA8888);;

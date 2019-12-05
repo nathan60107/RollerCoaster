@@ -18,10 +18,15 @@ void TrainView::initializeGL()
 	const GLubyte* version = glGetString(GL_VERSION);
 	const GLubyte* shading = glGetString(GL_SHADING_LANGUAGE_VERSION);
 
-	printf("vendor = %s\n", vendor, renderer, glGetString(GL_VERSION), glGetString(GL_SHADING_LANGUAGE_VERSION));
-	printf("GPU version = %s\n", renderer);
+	printf("=======================================\n");
+	printf("=======================================\n");
+	printf("Hardware Information:\n");
+	printf("vendor         = %s\n", vendor);
+	printf("GPU version    = %s\n", renderer);
 	printf("OpenGL version = %s\n", version);
-	printf("GLSL version = %s\n", shading);
+	printf("GLSL version   = %s\n", shading);
+	printf("=======================================\n");
+	printf("=======================================\n");
 
 	//Create a triangle object
 	triangle = new Triangle();
@@ -44,6 +49,7 @@ void TrainView::initializeGL()
 	//Initialize texture 
 	initializeTexture();
 }
+
 void TrainView::initializeTexture()
 {
 	//Load and create a texture for square;'stexture
@@ -69,14 +75,9 @@ void TrainView:: resetArcball()
 
 void TrainView::paintGL()
 {
-	int depthWidth = 1024, depthHeight = 1024;
-	//glActiveTexture(GL_TEXTURE0 + frameBuffer->texture());
-	//glBindTexture(GL_TEXTURE_2D, frameBuffer->texture());
+	int depthWidth = width(), depthHeight = height();
 	frameBuffer->bind();
-	//glViewport(0, 0, 1024, 1024);
 	glViewport(0, 0, depthWidth, depthHeight);
-	//glEnable(GL_CULL_FACE);
-	//glCullFace(GL_BACK);
 
 	// Enable depth test
 	glEnable(GL_DEPTH_TEST);
@@ -85,22 +86,14 @@ void TrainView::paintGL()
 	glDepthFunc(GL_LESS);
 
 	// Cull triangles which normal is not towards the camera
-	//glEnable(GL_CULL_FACE);
+	glEnable(GL_CULL_FACE);
+	//glCullFace(GL_BACK);
+	
 	glClearColor(1, 1, 1, 0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		
 	QMatrix4x4  depthProjectionMatrix, depthViewMatrix, depthModelMatrix, depthMVP;
-	//QMatrix4x4  depthProjectionMatrix(ProjectionMatrex), depthViewMatrix(ModelViewMatrex), depthModelMatrix, depthMVP;
-	//depthProjectionMatrix.transposed(), depthViewMatrix.transposed();
 	double aspect = depthWidth / depthHeight;
-	//depthProjectionMatrix.perspective(arcball.fieldOfView, aspect, .1, 1000);
-	/*depthViewMatrix.setToIdentity();
-	depthViewMatrix.translate(arcball.eyeX, arcball.eyeY, arcball.eyeZ);
-	HMatrix m;
-	arcball.getMatrix(m);
-	QMatrix4x4 mm2(asGlMatrix(m));
-	depthViewMatrix = depthViewMatrix * mm2;
-	depthModelMatrix.setToIdentity();*/
 
 	//printf("%f %f %f\n", arcball.eyeX, arcball.eyeY, arcball.eyeZ);
 	/*QVector3D lightInvDir(0, 250, 0); //gg += 0.01;
@@ -113,19 +106,10 @@ void TrainView::paintGL()
 
 	QVector3D LID(0,0,0), lightPos(0, 50, 250);
 	depthProjectionMatrix.setToIdentity();
-	depthProjectionMatrix.perspective(60, aspect, 130, 370);
+	depthProjectionMatrix.perspective(45, aspect, 130, 370);
 	depthViewMatrix.setToIdentity();
 	depthViewMatrix.lookAt(lightPos, LID, QVector3D(0, 1, 0));
 	depthModelMatrix.setToIdentity();
-
-	/*QVector3D LID(0, 0, 0), lightPos(300, 300, 300);
-	depthProjectionMatrix.perspective(40, aspect, .1, 1000);
-	depthViewMatrix.lookAt(lightPos, LID, QVector3D(1, 0, 0));
-	depthModelMatrix.setToIdentity();*/
-
-	//depthViewMatrix = arcball.MV, depthProjectionMatrix = arcball.PP;
-	//depthViewMatrix = MV, depthProjectionMatrix = PP;
-	//depthProjectionMatrix.transposed(), depthViewMatrix.transposed();
 	
 	depthMVP = depthProjectionMatrix * depthViewMatrix * depthModelMatrix;
 	//depthMVP = depthProjectionMatrix * depthViewMatrix;
@@ -396,8 +380,8 @@ void TrainView::drawWood(Pnt3f rail, Pnt3f side, Pnt3f pos, bool doingShadows) {
 
 void TrainView::initDepth()
 {
-	frameBuffer = new QOpenGLFramebufferObject(1024, 1024, QOpenGLFramebufferObject::Depth);
-	//frameBuffer = new QOpenGLFramebufferObject(width(), height(), QOpenGLFramebufferObject::Depth);
+	//frameBuffer = new QOpenGLFramebufferObject(1024, 1024, QOpenGLFramebufferObject::Depth);
+	frameBuffer = new QOpenGLFramebufferObject(width(), height(), QOpenGLFramebufferObject::Depth);
 	frameBuffer->bind();
 	//glDrawBuffer(GL_NONE);//開了會爆
 	glReadBuffer(GL_NONE);
