@@ -1,4 +1,4 @@
-#include "TrainView.h"  
+﻿#include "TrainView.h"  
 
 TrainView::TrainView(QWidget *parent) :  
 QGLWidget(parent)  
@@ -12,6 +12,17 @@ TrainView::~TrainView()
 void TrainView::initializeGL()
 {
 	initializeOpenGLFunctions();
+
+	const GLubyte* vendor = glGetString(GL_VENDOR); // Returns the vendor
+	const GLubyte* renderer = glGetString(GL_RENDERER); // Returns a hint to the model
+	const GLubyte* version = glGetString(GL_VERSION);
+	const GLubyte* shading = glGetString(GL_SHADING_LANGUAGE_VERSION);
+
+	printf("vendor = %s\n", vendor, renderer, glGetString(GL_VERSION), glGetString(GL_SHADING_LANGUAGE_VERSION));
+	printf("GPU version = %s\n", renderer);
+	printf("OpenGL version = %s\n", version);
+	printf("GLSL version = %s\n", shading);
+
 	//Create a triangle object
 	triangle = new Triangle();
 	//Initialize the triangle object
@@ -58,67 +69,76 @@ void TrainView:: resetArcball()
 
 void TrainView::paintGL()
 {
+	int depthWidth = 1024, depthHeight = 1024;
 	//glActiveTexture(GL_TEXTURE0 + frameBuffer->texture());
 	//glBindTexture(GL_TEXTURE_2D, frameBuffer->texture());
 	frameBuffer->bind();
 	//glViewport(0, 0, 1024, 1024);
-	glViewport(0, 0, width(), height());
+	glViewport(0, 0, depthWidth, depthHeight);
 	//glEnable(GL_CULL_FACE);
 	//glCullFace(GL_BACK);
 
+	// Enable depth test
+	glEnable(GL_DEPTH_TEST);
+
+	// Accept fragment if it closer to the camera than the former one
+	glDepthFunc(GL_LESS);
+
+	// Cull triangles which normal is not towards the camera
+	//glEnable(GL_CULL_FACE);
 	glClearColor(1, 1, 1, 0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	
-	//Get modelview matrix
-	glGetFloatv(GL_MODELVIEW_MATRIX, ModelViewMatrex);
-	//Get projection matrix
-	glGetFloatv(GL_PROJECTION_MATRIX, ProjectionMatrex);
+		
+	QMatrix4x4  depthProjectionMatrix, depthViewMatrix, depthModelMatrix, depthMVP;
+	//QMatrix4x4  depthProjectionMatrix(ProjectionMatrex), depthViewMatrix(ModelViewMatrex), depthModelMatrix, depthMVP;
+	//depthProjectionMatrix.transposed(), depthViewMatrix.transposed();
+	double aspect = depthWidth / depthHeight;
+	//depthProjectionMatrix.perspective(arcball.fieldOfView, aspect, .1, 1000);
+	/*depthViewMatrix.setToIdentity();
+	depthViewMatrix.translate(arcball.eyeX, arcball.eyeY, arcball.eyeZ);
+	HMatrix m;
+	arcball.getMatrix(m);
+	QMatrix4x4 mm2(asGlMatrix(m));
+	depthViewMatrix = depthViewMatrix * mm2;
+	depthModelMatrix.setToIdentity();*/
 
-	QVector3D lightInvDir(0, 20, 20); //gg += 0.01;
-	QMatrix4x4  depthProjectionMatrix(ProjectionMatrex), depthViewMatrix(ModelViewMatrex), depthModelMatrix, depthMVP;
-	double aspect = (width() / height());
-	//depthModelMatrix.perspective(arcball.fieldOfView, aspect, .1, 1000);
-	//depthViewMatrix.setToIdentity();
-	//depthModelMatrix.setToIdentity();
-	//depthModelMatrix.translate(-arcball.eyeX, -arcball.eyeY, -arcball.eyeZ);
-
-	/*depthProjectionMatrix.setToIdentity();
-	depthProjectionMatrix.ortho(-10, 10, -10, 10, -10, 20);
+	//printf("%f %f %f\n", arcball.eyeX, arcball.eyeY, arcball.eyeZ);
+	/*QVector3D lightInvDir(0, 250, 0); //gg += 0.01;
+	float oo = 120;
+	depthProjectionMatrix.setToIdentity();
+	depthProjectionMatrix.ortho(-oo, oo, -oo, oo, 0.1, 1000);
 	depthViewMatrix.setToIdentity();
 	depthViewMatrix.lookAt(lightInvDir, QVector3D(0, 0, 0), QVector3D(1, 0, 0));
 	depthModelMatrix.setToIdentity();*/
 
-	//QVector3D LID(0.5, 2, 2), lightPos(5, 20, 20);
-	//depthProjectionMatrix.perspective(40, aspect, 2, 50);
-	//depthViewMatrix.lookAt(lightPos, LID, QVector3D(0, 1, 0));
-	//depthModelMatrix.setToIdentity();
+	QVector3D LID(0,0,0), lightPos(0, 50, 250);
+	depthProjectionMatrix.setToIdentity();
+	depthProjectionMatrix.perspective(60, aspect, 130, 370);
+	depthViewMatrix.setToIdentity();
+	depthViewMatrix.lookAt(lightPos, LID, QVector3D(0, 1, 0));
+	depthModelMatrix.setToIdentity();
 
+	/*QVector3D LID(0, 0, 0), lightPos(300, 300, 300);
+	depthProjectionMatrix.perspective(40, aspect, .1, 1000);
+	depthViewMatrix.lookAt(lightPos, LID, QVector3D(1, 0, 0));
+	depthModelMatrix.setToIdentity();*/
+
+	//depthViewMatrix = arcball.MV, depthProjectionMatrix = arcball.PP;
+	//depthViewMatrix = MV, depthProjectionMatrix = PP;
+	//depthProjectionMatrix.transposed(), depthViewMatrix.transposed();
 	
 	depthMVP = depthProjectionMatrix * depthViewMatrix * depthModelMatrix;
 	//depthMVP = depthProjectionMatrix * depthViewMatrix;
 
-	/*GLfloat SSR[4][4];
-	for (int i = 0; i < 4; i++) {
-		for (int j = 0; j < 4; j++) {
-			/*float aa = 0;
-			for (int k = 0; k < 4; k++) {
-				aa += ProjectionMatrex[i * 4 + k] * ModelViewMatrex[k * 4 + j];
-			}
-			SSR[i][j] = aa;
-			printf("%f ", depthMVP.data()[j * 4 + i]);
-		}printf("\n");
-	}*/
-
 	depthShaderProgram->bind();
 	//depthShaderProgram->setUniformValue("depthMVP", depthMVP);
-	depthShaderProgram->setUniformValue("ProjectionMatrix",depthProjectionMatrix.transposed());
-	depthShaderProgram->setUniformValue("ModelViewMatrix", depthViewMatrix.transposed());
+	depthShaderProgram->setUniformValue("ProjectionMatrix",depthProjectionMatrix);
+	depthShaderProgram->setUniformValue("ModelViewMatrix", depthViewMatrix);
 	//test->PaintMountainShadow(depthMVP.transposed(), depthShaderProgram);
 	test->PaintMountainShadow(ProjectionMatrex, ModelViewMatrex, depthShaderProgram);
 
 	auto FBOtext = frameBuffer->texture();
-	//printf("%d\n", FBOtext);
-	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 	if (save) {
 		QImage FBOimg = frameBuffer->toImage();
 		FBOimg.save("FBO.BMP");
@@ -129,12 +149,7 @@ void TrainView::paintGL()
 	glBindTexture(GL_TEXTURE_2D, FBOtext);
 	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	/*glPointSize(10);
-	glBegin(GL_POINT);
-	glVertex3f(0, -20, 0);
-	glEnd();*/
-
-
+	{
 	//*********************************************************************
 	//
 	// * Set up basic opengl informaiton
@@ -142,17 +157,17 @@ void TrainView::paintGL()
 	//**********************************************************************
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 	// Set up the view port
-	glViewport(0,0,width(),height());
+	glViewport(0, 0, width(), height());
 	// clear the window, be sure to clear the Z-Buffer too
-	glClearColor(0,0,0.3f,0);
-	
+	glClearColor(0, 0, 0.3f, 0);
+
 	// we need to clear out the stencil buffer since we'll use
 	// it for shadows
 	glClearStencil(0);
 	glEnable(GL_DEPTH);
 
 	// Blayne prefers GL_DIFFUSE
-    glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
+	glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
 
 	// prepare for projection
 	glMatrixMode(GL_PROJECTION);
@@ -174,7 +189,8 @@ void TrainView::paintGL()
 	if (this->camera == 1) {
 		glDisable(GL_LIGHT1);
 		glDisable(GL_LIGHT2);
-	} else {
+	}
+	else {
 		glEnable(GL_LIGHT1);
 		glEnable(GL_LIGHT2);
 	}
@@ -184,13 +200,13 @@ void TrainView::paintGL()
 	// * set the light parameters
 	//
 	//**********************************************************************
-	GLfloat lightPosition1[]	= {0,1,1,0}; // {50, 200.0, 50, 1.0};
-	GLfloat lightPosition2[]	= {1, 0, 0, 0};
-	GLfloat lightPosition3[]	= {0, -1, 0, 0};
-	GLfloat yellowLight[]		= {0.5f, 0.5f, .1f, 1.0};
-	GLfloat whiteLight[]		= {1.0f, 1.0f, 1.0f, 1.0};
-	GLfloat blueLight[]			= {.1f,.1f,.3f,1.0};
-	GLfloat grayLight[]			= {.3f, .3f, .3f, 1.0};
+	GLfloat lightPosition1[] = { 0,1,1,0 }; // {50, 200.0, 50, 1.0};
+	GLfloat lightPosition2[] = { 1, 0, 0, 0 };
+	GLfloat lightPosition3[] = { 0, -1, 0, 0 };
+	GLfloat yellowLight[] = { 0.5f, 0.5f, .1f, 1.0 };
+	GLfloat whiteLight[] = { 1.0f, 1.0f, 1.0f, 1.0 };
+	GLfloat blueLight[] = { .1f,.1f,.3f,1.0 };
+	GLfloat grayLight[] = { .3f, .3f, .3f, 1.0 };
 
 	glLightfv(GL_LIGHT0, GL_POSITION, lightPosition1);
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, whiteLight);
@@ -207,7 +223,7 @@ void TrainView::paintGL()
 	//*********************************************************************
 	setupFloor();
 	glDisable(GL_LIGHTING);
-	drawFloor(200,10);
+	drawFloor(200, 10);
 
 
 	//*********************************************************************
@@ -227,31 +243,31 @@ void TrainView::paintGL()
 	}
 
 	//Get modelview matrix
- 	glGetFloatv(GL_MODELVIEW_MATRIX, ModelViewMatrex);
+	glGetFloatv(GL_MODELVIEW_MATRIX, ModelViewMatrex);
 	//Get projection matrix
- 	glGetFloatv(GL_PROJECTION_MATRIX, ProjectionMatrex);
+	glGetFloatv(GL_PROJECTION_MATRIX, ProjectionMatrex);
 
 	//QMatrix4x4(ModelViewMatrex);
 
 	glActiveTexture(GL_TEXTURE0 + skybox->textureIndex);
-	skybox->Paint(ProjectionMatrex,ModelViewMatrex, QVector3D(arcball.eyeX, arcball.eyeY, arcball.eyeZ));
+	skybox->Paint(ProjectionMatrex, ModelViewMatrex, QVector3D(arcball.eyeX, arcball.eyeY, arcball.eyeZ));
 
 	//Call triangle's render function, pass ModelViewMatrex and ProjectionMatrex
- 	triangle->Paint(ProjectionMatrex,ModelViewMatrex);
-	
+	triangle->Paint(ProjectionMatrex, ModelViewMatrex);
+
 	//we manage textures by Trainview class, so we modify square's render function
 	square->Begin();
-		//Active Texture
-		glActiveTexture(GL_TEXTURE0);
-		//Bind square's texture
-		Textures[0]->bind();
-		//pass texture to shader
-		square->shaderProgram->setUniformValue("Texture",0);
-		//Call square's render function, pass ModelViewMatrex and ProjectionMatrex
-		square->Paint(ProjectionMatrex,ModelViewMatrex);
+	//Active Texture
+	glActiveTexture(GL_TEXTURE0);
+	//Bind square's texture
+	Textures[0]->bind();
+	//pass texture to shader
+	square->shaderProgram->setUniformValue("Texture", 0);
+	//Call square's render function, pass ModelViewMatrex and ProjectionMatrex
+	square->Paint(ProjectionMatrex, ModelViewMatrex);
 	square->End();
 
-
+	}
 	QMatrix4x4 biasMatrix(
 		0.5, 0.0, 0.0, 0.0,
 		0.0, 0.5, 0.0, 0.0,
@@ -259,9 +275,7 @@ void TrainView::paintGL()
 		0.5, 0.5, 0.5, 1.0
 	);
 	//QMatrix4x4 depthBiasMVP = /*biasMatrix **/ depthMVP;
-
 	
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	test->Begin(false);
 		//Active Texture
 		glActiveTexture(GL_TEXTURE1);
@@ -270,12 +284,15 @@ void TrainView::paintGL()
 		//pass texture to shader
 		test->mountainShaderProgram->setUniformValue("Texture", 1);
 		//test->mountainShaderProgram->setUniformValue("DepthBiasMVP", depthMVP);
-		//test->mountainShaderProgram->setUniformValue("shadowMap", frameBuffer->texture());
+		test->mountainShaderProgram->setUniformValue("depthP", depthProjectionMatrix);
+		test->mountainShaderProgram->setUniformValue("depthMV", depthViewMatrix);
+		test->mountainShaderProgram->setUniformValue("shadowMap", frameBuffer->texture());
 
 		test->PaintMountain(ProjectionMatrex, ModelViewMatrex, QVector3D(arcball.eyeX, arcball.eyeY, arcball.eyeZ));
 	test->End(false);
 	
 	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	test->Begin(true);
 		//Active Texture
 		//glActiveTexture(GL_TEXTURE2);
@@ -379,8 +396,12 @@ void TrainView::drawWood(Pnt3f rail, Pnt3f side, Pnt3f pos, bool doingShadows) {
 
 void TrainView::initDepth()
 {
-	//frameBuffer = new QOpenGLFramebufferObject(1024, 1024, QOpenGLFramebufferObject::Depth);
-	frameBuffer = new QOpenGLFramebufferObject(width(), height(), QOpenGLFramebufferObject::Depth);
+	frameBuffer = new QOpenGLFramebufferObject(1024, 1024, QOpenGLFramebufferObject::Depth);
+	//frameBuffer = new QOpenGLFramebufferObject(width(), height(), QOpenGLFramebufferObject::Depth);
+	frameBuffer->bind();
+	//glDrawBuffer(GL_NONE);//開了會爆
+	glReadBuffer(GL_NONE);
+	frameBuffer->release();
 
 	/*depthVao.create();
 	depthVao.bind();*/

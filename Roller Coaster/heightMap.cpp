@@ -16,7 +16,7 @@ heightMap::heightMap(QString path, int size, int baseHeight, float waterH):water
 
 	for (int i = 0; i < size; i++) {
 		for (int j = 0; j < size; j++) {
-			triangle << QVector3D(i * (size + 1) + j, (i + 1) * (size + 1) + j, i * (size + 1) + j + 1);
+			triangle << QVector3D(i * (size + 1) + j, i * (size + 1) + j + 1, (i + 1) * (size + 1) + j);
 			triangle << QVector3D((i + 1) * (size + 1) + j + 1, (i + 1) * (size + 1) + j, i * (size + 1) + j + 1);
 		}
 	}
@@ -64,7 +64,7 @@ void heightMap::generateWater()
 		}
 
 		water_verticesVbo << tri[0] + QVector3D(0, 1, 0) << tri[1] + QVector3D(0, 1, 0) << tri[2] + QVector3D(0, 1, 0)
-						<< tri[3] + QVector3D(0, 1, 0) << tri[1] + QVector3D(0, 1, 0) << tri[2] + QVector3D(0, 1, 0);
+						<< tri[3] + QVector3D(0, 1, 0) << tri[2] + QVector3D(0, 1, 0) << tri[1] + QVector3D(0, 1, 0);
 
 		NEXT:;
 	}
