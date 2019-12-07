@@ -11,9 +11,9 @@
 #include "Track.H"
 #include "Triangle.h"
 #include "Square.h"
-#include "myTriangle.h"
+#include "Scenery.h"
 #include "Model.h"
-#include "skybox.h"
+#include "Skybox.h"
 
 class AppMain;
 class CTrack;
