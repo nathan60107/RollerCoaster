@@ -75,6 +75,12 @@ void TrainView:: resetArcball()
 
 void TrainView::paintGL()
 {
+	//drawing shadow frame buffer
+	//main reference: "https://learnopengl-cn.readthedocs.io/zh/latest/05 Advanced Lighting/03 Shadows/01 Shadow Mapping/"
+	//sub reference: http://www.opengl-tutorial.org/intermediate-tutorials/tutorial-16-shadow-mapping/
+	//https://blog.csdn.net/gamesdev/article/details/45969675
+	//https://stackoverflow.com/questions/35134270/how-to-use-qopenglframebufferobject-for-shadow-mapping
+
 	int depthWidth = width(), depthHeight = height();
 	frameBuffer->bind();
 	glViewport(0, 0, depthWidth, depthHeight);
