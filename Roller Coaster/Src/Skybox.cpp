@@ -28,6 +28,9 @@ void Skybox::Paint(GLfloat* ProjectionMatrix, GLfloat* ModelViewMatrix, QVector3
 	GLfloat MV[4][4];
 	DimensionTransformation(ProjectionMatrix, P);
 	DimensionTransformation(ModelViewMatrix, MV);
+
+	MV[3][0] = MV[3][1] = MV[3][2] = 0;
+
 	//pass projection matrix to shader
 	shaderProgram->setUniformValue("ProjectionMatrix", P);
 	//pass modelview matrix to shader

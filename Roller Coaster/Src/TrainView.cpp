@@ -175,6 +175,11 @@ void TrainView::paintGL()
 	glEnable(GL_LIGHTING);
 	glEnable(GL_LIGHT0);
 
+	glDisable(GL_DEPTH_TEST);
+	glActiveTexture(GL_TEXTURE0 + skybox->textureIndex);
+	skybox->Paint(ProjectionMatrex, ModelViewMatrex, QVector3D(arcball.eyeX, arcball.eyeY, arcball.eyeZ));
+	glEnable(GL_DEPTH_TEST);
+
 	// top view only needs one light
 	if (this->camera == 1) {
 		glDisable(GL_LIGHT1);
@@ -239,8 +244,7 @@ void TrainView::paintGL()
 
 	//QMatrix4x4(ModelViewMatrex);
 
-	glActiveTexture(GL_TEXTURE0 + skybox->textureIndex);
-	skybox->Paint(ProjectionMatrex, ModelViewMatrex, QVector3D(arcball.eyeX, arcball.eyeY, arcball.eyeZ));
+	
 
 	//Call triangle's render function, pass ModelViewMatrex and ProjectionMatrex
 	triangle->Paint(ProjectionMatrex, ModelViewMatrex);
