@@ -46,8 +46,9 @@ void TrainView::initializeGL()
 	skybox = new Skybox(2);
 	skybox->Init();
 
-	trainHead = new TrainHead("../../Model/train/11709_train_v1_L3.obj", "../../Shader/train head.vs", "../../Shader/train head.fs");
-
+	for (int i = 0; i < 3; i++){
+		trainHead[i] = new TrainHead("../../Model/train/11709_train_v1_L3.obj", "../../Shader/train head.vs", "../../Shader/train head.fs");
+	}
 	//Initialize texture 
 	initializeTexture();
 }
@@ -59,7 +60,7 @@ void TrainView::initializeTexture()
 	QOpenGLTexture* heightMapTexture = new QOpenGLTexture(QImage("../../Textures/sand.png"));
 	Textures.push_back(texture);
 	Textures.push_back(heightMapTexture);
-	train = new Model("../../Model/train/11709_train_v1_L3.obj", 10, Point3d(0, 0, 0));
+	//train = new Model("../../Model/train/11709_train_v1_L3.obj", 10, Point3d(0, 0, 0));
 	
 	Textures.push_back(skybox->texture);
 
@@ -283,9 +284,9 @@ void TrainView::paintGL()
 	
 	scenery->Begin(false);
 		//Active Texture
-		/*glActiveTexture(GL_TEXTURE1);
+		//glActiveTexture(GL_TEXTURE1);
 		//Bind square's texture
-		Textures[1]->bind();*/
+		//Textures[1]->bind();
 		//pass texture to shader
 		scenery->mountainShaderProgram->setUniformValue("Texture", 1);
 		//test->mountainShaderProgram->setUniformValue("DepthBiasMVP", depthMVP);
@@ -352,9 +353,9 @@ setProjection()
 		glMatrixMode(GL_PROJECTION);
 		glLoadIdentity();
 		gluPerspective(arcball.fieldOfView, aspect, .1, 1000);
-		gluLookAt(train->pos.x/10 + train->front.x * 6, train->pos.y/10 + train->front.y * 6 + 3, train->pos.z/10 + train->front.z * 6,
-			train->pos.x/10 + train->front.x*7, train->pos.y/10 + train->front.y*7 + 3, train->pos.z/10 + train->front.z*7,
-			train->orient.x, train->orient.y, train->orient.z);
+		gluLookAt(trainHead[0]->pos.x/10 + trainHead[0]->front.x * 6, trainHead[0]->pos.y/10 + trainHead[0]->front.y * 6 + 3, trainHead[0]->pos.z/10 + trainHead[0]->front.z * 6,
+			trainHead[0]->pos.x/10 + trainHead[0]->front.x*7, trainHead[0]->pos.y/10 + trainHead[0]->front.y*7 + 3, trainHead[0]->pos.z/10 + trainHead[0]->front.z*7,
+			trainHead[0]->orient.x, trainHead[0]->orient.y, trainHead[0]->orient.z);
 		glMatrixMode(GL_MODELVIEW);
 		glLoadIdentity();
 		update();
@@ -479,7 +480,6 @@ void TrainView::drawStuff(bool doingShadows)
 
 	//draw rail
 	int N = m_pTrack->points.size();
-	t_time += (isrun?speed:0);
 	int worldPos = 0;
 	vector<Pnt3f> veco, vecp, pToDraw;
 
@@ -592,22 +592,39 @@ void TrainView::drawStuff(bool doingShadows)
 		pToDraw.push_back(v2 - side2);
 		drawWood(v2 - v1, side1, v1, doingShadows);
 
-		if (worldPos <= t_time && t_time < worldPos + 10) {
-			Pnt3f trainPos = (worldPos + 10 - t_time) * v1 +
-				(t_time - worldPos) * v2,
-				trainDir = (worldPos + 10 - t_time) * (v2 - v1).normalize() +
-				(t_time - worldPos) * (v3 - v2).normalize();
+		for (int j = 0; j < trainNumber; j++) {
+			if (worldPos <= t_time[j] && t_time[j] < worldPos + 10) {
+				Pnt3f trainPos = (worldPos + 10 - t_time[j]) * v1 +
+					(t_time[j] - worldPos) * v2,
+					trainDir = (worldPos + 10 - t_time[j]) * (v2 - v1).normalize() +
+					(t_time[j] - worldPos) * (v3 - v2).normalize(),
+					ori = (side1 * (v2 - v1)).normalize(),//指向火車頭頂
+					dir = trainDir.normalize(),
+					dir_noY = trainDir,
+					ori_noX = ori,
+					ori_noZ = ori;
+				
+				dir_noY.y = 0;
+				dir_noY = dir_noY.normalize();
+				ori_noX.x = 0;
+				ori_noX = ori_noX.normalize();
+				ori_noZ.z = 0;
+				ori_noZ = ori_noZ.normalize();
 
-			//train->changePos(Point3d(trainPos), trainDir.normalize(), (side1 * (v2 - v1)).normalize());
+				float rX = acos(ori_noX.y) * (ori_noX.z > 0 ? 1 : -1),
+					rY = acos(dir_noY.z) * (dir_noY.x > 0 ? +1 : -1) - PI / 2,
+					rZ = acos(ori_noZ.y) * (ori_noZ.x > 0 ? -1 : 1);
 			
-			Point3d ori = (side1 * (v2 - v1)).normalize(),
-				dir = trainDir.normalize();
-			float rX = -PI / 2 - acos(ori.y) * (ori.z > 0 ? 1 : -1) +PI/2,
-				rY = acos(dir.x) * (dir.z > 0 ? -1 : 1);;
-			//rX = rY = 0;
+				trainHead[j]->drawTrain(ProjectionMatrex, ModelViewMatrex, 
+					QVector3D(trainPos.x, trainPos.y, trainPos.z), Point3d(trainPos), dir, ori,
+					rX, rY, rZ);
 
-			trainHead->drawTrain(ProjectionMatrex, ModelViewMatrex, QVector3D(trainPos.x, trainPos.y, trainPos.z), rX, rY);
+				if (j == 0) {
+					trainAngle = -dir.y;
+				}
+			}
 		}
+		
 		worldPos += 10;
 	}
 
@@ -621,9 +638,13 @@ void TrainView::drawStuff(bool doingShadows)
 	}
 	glEnd();
 
-	//draw train
-	//train->render(0,0);
-	if (t_time > worldPos) t_time -= worldPos;
+	for (int i = 0; i < 3; i++) {
+		if (trainAngle < -0.3)trainAngle = -0.3;
+		t_time[i] += (isrun ? speed * (1 + trainAngle) : 0);
+	}
+	for (int i = 0; i < 3; i++) {
+		if (t_time[i] > worldPos) t_time[i] -= worldPos;
+	}
 	
 
 

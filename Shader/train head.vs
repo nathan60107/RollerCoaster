@@ -11,9 +11,11 @@ uniform mat4 depthP;
 uniform mat4 depthMV;
 uniform float rX;
 uniform float rY;
+uniform float rZ;
 uniform float time;
 uniform vec3 center;
 uniform bool isWheel;
+uniform float scale;
 
 out vec2 texCord;
 out vec4 ShadowCoord;
@@ -45,10 +47,12 @@ mat4 rotationZ( in float angle ) {
 void main(void)
 {
 	vec4 v = vec4(vertex, 1);
+	v = v * scale;
 	if(isWheel){
 		v = ((v - vec4(center, 1)) * rotationZ(time)) + vec4(center, 1);
 	}
-	v = v * rotationX(rX) * rotationY(rY);
+	v = v  * rotationY(rY) * rotationZ(rZ)* rotationX(rX);
+	
 	v = v + vec4(trainPos, 1) / 9;
 	
 	vec4 p = ProjectionMatrix * ModelViewMatrix * v;

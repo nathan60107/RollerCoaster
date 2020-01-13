@@ -42,6 +42,9 @@ public:
     QAction *aLinear;
     QAction *aCardinal;
     QAction *aCubic;
+    QAction *aTrain1;
+    QAction *aTrain2;
+    QAction *aTrain3;
     QAction *aLine;
     QAction *aTrack;
     QAction *aRoad;
@@ -77,6 +80,7 @@ public:
     QMenu *menuCamera;
     QMenu *menuCurve;
     QMenu *menuTrack;
+	QMenu *menuTrainNumber;
     QMenu *menuVelocity;
     QStatusBar *statusBar;
     QToolBar *mainToolBar;
@@ -131,6 +135,18 @@ public:
         aCubic = new QAction(AppMainClass);
         aCubic->setObjectName(QStringLiteral("aCubic"));
         aCubic->setCheckable(true);
+		aTrain1 = new QAction(AppMainClass);
+		aTrain1->setObjectName(QStringLiteral("aTrain1"));
+		aTrain1->setCheckable(false);
+		aTrain1->setChecked(false);
+		aTrain2 = new QAction(AppMainClass);
+		aTrain2->setObjectName(QStringLiteral("aTrain2"));
+		aTrain2->setCheckable(false);
+		aTrain2->setChecked(false);
+		aTrain3 = new QAction(AppMainClass);
+		aTrain3->setObjectName(QStringLiteral("aTrain3"));
+		aTrain3->setCheckable(false);
+		aTrain3->setChecked(false);
         aLine = new QAction(AppMainClass);
         aLine->setObjectName(QStringLiteral("aLine"));
         aLine->setCheckable(false);
@@ -554,6 +570,8 @@ public:
         menuCamera->setObjectName(QStringLiteral("menuCamera"));
         menuCurve = new QMenu(menuBar);
         menuCurve->setObjectName(QStringLiteral("menuCurve"));
+		menuTrainNumber = new QMenu(menuBar);
+		menuTrainNumber->setObjectName(QStringLiteral("menuTrainNumber"));
         menuTrack = new QMenu(menuBar);
         menuTrack->setObjectName(QStringLiteral("menuTrack"));
         menuVelocity = new QMenu(menuBar);
@@ -570,6 +588,7 @@ public:
         menuBar->addAction(menuCamera->menuAction());
         menuBar->addAction(menuTrack->menuAction());
         menuBar->addAction(menuCurve->menuAction());
+        menuBar->addAction(menuTrainNumber->menuAction());
         menuBar->addAction(menuVelocity->menuAction());
         menuFile->addAction(aLoadPath);
         menuFile->addAction(aSavePath);
@@ -581,6 +600,9 @@ public:
         menuCurve->addAction(aLinear);
         menuCurve->addAction(aCardinal);
         menuCurve->addAction(aCubic);
+		menuTrainNumber->addAction(aTrain1);
+		menuTrainNumber->addAction(aTrain2);
+		menuTrainNumber->addAction(aTrain3);
         menuTrack->addAction(aLine);
         menuTrack->addAction(aTrack);
         menuTrack->addAction(aRoad);
@@ -604,6 +626,9 @@ public:
         aLinear->setText(QApplication::translate("AppMainClass", "Linear", Q_NULLPTR));
         aCardinal->setText(QApplication::translate("AppMainClass", "Cardinal", Q_NULLPTR));
         aCubic->setText(QApplication::translate("AppMainClass", "Cubic", Q_NULLPTR));
+		aTrain1->setText(QApplication::translate("AppMainClass", "Train1", Q_NULLPTR));
+		aTrain2->setText(QApplication::translate("AppMainClass", "Train2", Q_NULLPTR));
+		aTrain3->setText(QApplication::translate("AppMainClass", "Train3", Q_NULLPTR));
         aLine->setText(QApplication::translate("AppMainClass", "Line", Q_NULLPTR));
         aTrack->setText(QApplication::translate("AppMainClass", "Track", Q_NULLPTR));
         aRoad->setText(QApplication::translate("AppMainClass", "Road", Q_NULLPTR));
@@ -642,6 +667,7 @@ public:
         menuFile->setTitle(QApplication::translate("AppMainClass", "File", Q_NULLPTR));
         menuCamera->setTitle(QApplication::translate("AppMainClass", "Camera", Q_NULLPTR));
         menuCurve->setTitle(QApplication::translate("AppMainClass", "Curve", Q_NULLPTR));
+        menuTrainNumber->setTitle(QApplication::translate("AppMainClass", "TrainNumber", Q_NULLPTR));
         menuTrack->setTitle(QApplication::translate("AppMainClass", "Track", Q_NULLPTR));
         menuVelocity->setTitle(QApplication::translate("AppMainClass", "Velocity", Q_NULLPTR));
     } // retranslateUi

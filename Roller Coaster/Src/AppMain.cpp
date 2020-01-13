@@ -53,6 +53,10 @@ AppMain::AppMain(QWidget *parent)
 	connect( ui.rcpxsub		,SIGNAL(clicked()),this,SLOT(RotateControlPointSubX())				);
 	connect( ui.rcpzadd		,SIGNAL(clicked()),this,SLOT(RotateControlPointAddZ())					);
 	connect( ui.rcpzsub		,SIGNAL(clicked()),this,SLOT(RotateControlPointSubZ())				);
+
+	connect( ui.aTrain1     ,SIGNAL(triggered()),this,SLOT(setTrainNumber1()));
+	connect( ui.aTrain2     ,SIGNAL(triggered()),this,SLOT(setTrainNumber2()));
+	connect( ui.aTrain3     ,SIGNAL(triggered()),this,SLOT(setTrainNumber3()));
 }
 
 AppMain::~AppMain()
@@ -170,6 +174,21 @@ void AppMain::ToggleToolBar()
 void AppMain::ToggleStatusBar()
 {
 	ui.statusBar->setHidden( !ui.statusBar->isHidden() );
+}
+
+void AppMain::setTrainNumber1()
+{
+	trainview->trainNumber = 1;
+}
+
+void AppMain::setTrainNumber2()
+{
+	trainview->trainNumber = 2;
+}
+
+void AppMain::setTrainNumber3()
+{
+	trainview->trainNumber = 3;
 }
 
 void AppMain::LoadTrackPath()

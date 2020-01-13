@@ -22,7 +22,7 @@ struct obj{
 	QOpenGLBuffer tvbo;
 
 	int textureNumber;
-	bool isWheel;
+	bool isWheel = 0;
 	QVector3D center;
 };
 
@@ -36,6 +36,8 @@ public:
 	obj trainPart[20];
 	int objCounter = -1;
 	float wheelTime = 0;
+	float scale = 1;
+	Point3d pos, front, orient;
 
 	QOpenGLShaderProgram* shaderProgram;
 	QOpenGLShader* vertexShader;
@@ -44,5 +46,5 @@ public:
 	TrainHead(const QString &filePath, const QString &vsPath, const QString &fsPath);
 	void InitShader(QString vertexShaderPath, QString fragmentShaderPath);
 	void DimensionTransformation(GLfloat source[], GLfloat target[][4]);
-	void drawTrain(GLfloat * ProjectionMatrix, GLfloat * ModelViewMatrix, QVector3D pos, float rX, float rY);
+	void drawTrain(GLfloat * ProjectionMatrix, GLfloat * ModelViewMatrix, QVector3D trainPos, Point3d p, Point3d dir, Point3d ori, float rX, float rY, float rZ);
 };

@@ -8,7 +8,7 @@ TrainHead::TrainHead(const QString & filePath, const QString &vsPath, const QStr
 	//read obj file
 	QFile file(filePath);
 
-	QFileInfo info(filePath);
+	QFileInfo info(filePath);//處理檔案不存在的狀況
 	if (!info.exists())
 	{
 		qDebug() << info.filePath() << " can't be found";
@@ -19,18 +19,18 @@ TrainHead::TrainHead(const QString & filePath, const QString &vsPath, const QStr
 
 	QTextStream in(&file);
 	while (!in.atEnd()) {
-		QString input = in.readLine();
+		QString input = in.readLine();//input=檔案中的其中一行
 		if (input.isEmpty() || input[0] == '#')
 			continue;
 
-		if (input[0] == 'g')
+		if (input[0] == 'g')//每遇到一個g就換下一個零件
 			objCounter++;
 
 		QTextStream ts(&input);
 		QString id;
-		ts >> id;
+		ts >> id;//id=每一行開頭第一個詞
 
-		if (id == "v") {//42194
+		if (id == "v") {//v為vertex的簡稱
 			Point3d p;
 			for (int i = 0; i < 3; ++i) {
 				ts >> p[i];
@@ -39,23 +39,21 @@ TrainHead::TrainHead(const QString & filePath, const QString &vsPath, const QStr
 			/*auto aa = vertex[g][vertex[g].size() - 1];
 			printf("v  %f %f %f\n", aa.x, aa.y, aa.z);*/
 		}
-		else if (id == "vn") {
+		else if (id == "vn") {//vertex normal
 			Point3d p;
 			for (int i = 0; i < 3; ++i) {
 				ts >> p[i];
 			}
 			normal << p;
 		}
-		else if (id == "vt") {//46072
+		else if (id == "vt") {//vertex texture coordinate
 			Point3d p;
 			for (int i = 0; i < 2; ++i) {
 				ts >> p[i];
 			}
 			texCoord << p;
 		}
-		else if (id == "f") {
-			QVarLengthArray<int, 4> p;
-
+		else if (id == "f") {//face, 格式為:f vertex1/texcoodr1/normal1 vertex2.... vertex3... vertex4...
 			while (!ts.atEnd()) {
 				QString str;
 				ts >> str;
@@ -65,7 +63,7 @@ TrainHead::TrainHead(const QString & filePath, const QString &vsPath, const QStr
 				//printf("\"%s\"\n", str.toStdString());
 
 				for (int i = 0; i < 3; i++) {
-					const int index = str.split('/').value(i).toInt();
+					const int index = str.split('/').value(i).toInt();//以/作為分隔把三個數字分開來並分開儲存 i=1是vertex 2是texcoord 3是normal
 
 					//printf("%s ", str.split('/').value(i));
 					face[objCounter][i] << (index - 1);//已經確認過沒有負index
@@ -77,7 +75,7 @@ TrainHead::TrainHead(const QString & filePath, const QString &vsPath, const QStr
 	//build buffer
 	for (int i = 0; i <= objCounter; i++) {
 		for (int j = 0; j < face[i][0].size(); j += 4) {
-			for (int k = 0; k < 3; k++) {
+			for (int k = 0; k < 3; k++) {//依照face給的index把東西丟進去
 				//printf("%d %d\n", face[i][1][j + k], texCoord.size());
 				trainPart[i].vertexs << QVector3D(vertex[face[i][0][j + k]].x, vertex[face[i][0][j + k]].z, vertex[face[i][0][j + k]].y);
 				trainPart[i].texCoords << QVector2D(texCoord[face[i][1][j + k]].x, texCoord[face[i][1][j + k]].y);
@@ -90,6 +88,7 @@ TrainHead::TrainHead(const QString & filePath, const QString &vsPath, const QStr
 			}
 		}
 
+		//創建vbo們
 		trainPart[i].vvbo.create();
 		trainPart[i].vvbo.bind();
 		trainPart[i].vvbo.setUsagePattern(QOpenGLBuffer::StaticDraw);
@@ -105,6 +104,7 @@ TrainHead::TrainHead(const QString & filePath, const QString &vsPath, const QStr
 		trainPart[i].nvbo.setUsagePattern(QOpenGLBuffer::StaticDraw);
 		trainPart[i].nvbo.allocate(trainPart[i].normals.constData(), trainPart[i].normals.size() * sizeof(QVector3D));
 
+		//處理其他參數
 		if (i == 0 || i == 1 || i==3 || i == 7 || i == 8 || i == 10 || i == 12) {
 			trainPart[i].textureNumber = 3;//wood
 		}
@@ -174,7 +174,9 @@ void TrainHead::DimensionTransformation(GLfloat source[], GLfloat target[][4])
 		}
 }
 
-void TrainHead::drawTrain(GLfloat* ProjectionMatrix, GLfloat* ModelViewMatrix, QVector3D pos, float rX, float rY) {
+void TrainHead::drawTrain(GLfloat* ProjectionMatrix, GLfloat* ModelViewMatrix, QVector3D trainPos, Point3d p, Point3d dir, Point3d ori, float rX, float rY, float rZ) {
+	pos = p, front = dir.normalize(), orient = ori;
+
 	shaderProgram->bind();
 	
 	GLfloat P[4][4];
@@ -186,9 +188,11 @@ void TrainHead::drawTrain(GLfloat* ProjectionMatrix, GLfloat* ModelViewMatrix, Q
 	//pass modelview matrix to shader
 	shaderProgram->setUniformValue("ModelViewMatrix", MV);
 
-	shaderProgram->setUniformValue("trainPos", pos);
+	shaderProgram->setUniformValue("trainPos", trainPos);
 	shaderProgram->setUniformValue("rX", rX);
 	shaderProgram->setUniformValue("rY", rY);
+	shaderProgram->setUniformValue("rZ", rZ);
+	shaderProgram->setUniformValue("scale", scale);
 
 	for (int i = 0; i <= objCounter; i++) {
 		shaderProgram->setUniformValue("Texture", trainPart[i].textureNumber);

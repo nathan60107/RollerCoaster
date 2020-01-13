@@ -57,6 +57,10 @@ private:
 	Ui::AppMainClass ui;
 
 	private slots:
+		void setTrainNumber1();
+		void setTrainNumber2();
+		void setTrainNumber3();
+
 		void LoadTrackPath();
 		void SaveTrackPath();
 		void ExitApp();

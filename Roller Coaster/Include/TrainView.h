@@ -12,7 +12,6 @@
 #include "Triangle.h"
 #include "Square.h"
 #include "Scenery.h"
-#include "Model.h"
 #include "Skybox.h"
 #include "TrainHead.h"
 
@@ -74,18 +73,13 @@ public:
 	Triangle* triangle;
 	Square* square;
 	Scenery *scenery;
-	TrainHead *trainHead;
+	TrainHead *trainHead[3];
+	int trainNumber = 3;
 	GLfloat ProjectionMatrex[16];
 	GLfloat ModelViewMatrex[16];
 	QVector<QOpenGLTexture*> Textures;
-	Model *train;
-	float t_time = 0;
+	float t_time[3] = { 50,25,0 };
 
-	/*//skybox
-	//QOpenGLShaderProgram skybox;
-	QOpenGLTexture *cubemapTexture;
-	QOpenGLBuffer skybuffer;
-	QBasicTimer mTimer;*/
 	Skybox *skybox;
 
 	//shadow
@@ -95,11 +89,11 @@ public:
 	QOpenGLShader* depthFragmentShader;
 	QOpenGLVertexArrayObject depthVao;
 	bool save = true;
-	float gg = 0;
 
 	unsigned int DIVIDE_LINE = 20;
 	float percent;
 	float speed = 0.5;
+	float trainAngle = 0;
 
 };  
 #endif // TRAINVIEW_H  
