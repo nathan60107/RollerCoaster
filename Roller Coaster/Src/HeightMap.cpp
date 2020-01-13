@@ -5,21 +5,35 @@ heightMap::heightMap(QString path, int size, int baseHeight, float waterH):water
 
 	heightMapImage = QImage("../../Textures/heightmap.jpg");
 
-	for (int i = 0; i <= size; i++){
-		for (int j = 0; j <= size; j++) {
-			int i_t = i / 2.0 / size * (heightMapImage.width() - 1),
+	float stride =1;
+
+	for (float i = 0; i <= size; i+= stride){
+		for (float j = 0; j <= size; j+= stride) {
+			float i_t = i / 2.0 / size * (heightMapImage.width() - 1),
 				j_t = j / 2.0 / size * (heightMapImage.height() - 1);
-			int height = qGray(heightMapImage.pixel(i_t, j_t));
+			//b d
+			//a c
+			/*float a = qGray(heightMapImage.pixel((int)i_t, (int)j_t)),
+				b = qGray(heightMapImage.pixel((int)i_t, ((int)j_t)+1)),
+				c = qGray(heightMapImage.pixel(((int)i_t)+1, (int)j_t)),
+				d = qGray(heightMapImage.pixel(((int)i_t)+1, ((int)j_t)+1)),
+				a_b = b * (j_t-(int)j_t) + a * (1- j_t + (int)j_t),
+				c_d = d * (j_t-(int)j_t) + c * (1- j_t + (int)j_t),
+				height = c_d * (i_t-(int)i_t) + a_b * (1- i_t + (int)i_t);*/
+			//printf("%f %f %f %f %f %f %f\n", a, b, c, d, a_b, c_d, height);
+				
+
+			float height = qGray(heightMapImage.pixel(i_t, j_t));
 
 			vertices << QVector3D(i - size / 2, baseHeight * height / 255.0 * 2, j - size / 2);//dimension = (size+1)^2
 		}
 	}
 	//printf("ver size = %d\n", vertices.size());
 
-	for (int i = 0; i < size; i++) {
-		for (int j = 0; j < size; j++) {
-			triangle << QVector3D(i * (size + 1) + j, i * (size + 1) + j + 1, (i + 1) * (size + 1) + j);
-			triangle << QVector3D((i + 1) * (size + 1) + j + 1, (i + 1) * (size + 1) + j, i * (size + 1) + j + 1);
+	for (float i = 0; i < size / stride; i++) {
+		for (float j = 0; j < size / stride; j++) {
+			triangle << QVector3D(i * (size/ stride + 1) + j, i * (size/ stride + 1) + j + 1, (i + 1) * (size / stride + 1) + j);
+			triangle << QVector3D((i + 1) * (size / stride + 1) + j + 1, (i + 1) * (size / stride + 1) + j, i * (size / stride + 1) + j + 1);
 		}
 	}
 	//printf("tri size = %d\n", triangle.size());
@@ -28,7 +42,8 @@ heightMap::heightMap(QString path, int size, int baseHeight, float waterH):water
 	for (int i = 0; i < triangle.size(); i++) {
 		QVector3D tri[3] = { vertices[triangle[i][0]], vertices[triangle[i][1]], vertices[triangle[i][2]] };
 		QVector3D vec[2] = { tri[0] - tri[1], tri[2] - tri[1] };
-		QVector3D cross = QVector3D::crossProduct(vec[0], vec[2]).normalized();
+		QVector3D cross = QVector3D::crossProduct(vec[1], vec[0]).normalized();
+		if (cross.y() < 0)printf("%f\n", cross.y());
 		for (int j = 0; j < 3; j++) {
 			normal[triangle[i][j]] += cross;
 		}

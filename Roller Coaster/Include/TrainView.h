@@ -14,6 +14,7 @@
 #include "Scenery.h"
 #include "Model.h"
 #include "Skybox.h"
+#include "TrainHead.h"
 
 class AppMain;
 class CTrack;
@@ -72,12 +73,13 @@ public:
 	bool isrun;
 	Triangle* triangle;
 	Square* square;
-	myTriangle *test;
+	Scenery *scenery;
+	TrainHead *trainHead;
 	GLfloat ProjectionMatrex[16];
 	GLfloat ModelViewMatrex[16];
 	QVector<QOpenGLTexture*> Textures;
 	Model *train;
-	float t_time;
+	float t_time = 0;
 
 	/*//skybox
 	//QOpenGLShaderProgram skybox;

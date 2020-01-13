@@ -194,6 +194,7 @@
     <ClCompile Include="Src\Skybox.cpp" />
     <ClCompile Include="Src\Square.cpp" />
     <ClCompile Include="Src\Track.cpp" />
+    <ClCompile Include="Src\TrainHead.cpp" />
     <ClCompile Include="Src\TrainView.cpp" />
     <ClCompile Include="Src\Triangle.cpp" />
     <ClCompile Include="Src\Utilities\3DUtils.cpp" />
@@ -227,12 +228,12 @@
     <ClInclude Include="Include\ControlPoint.H" />
     <ClInclude Include="Include\HeightMap.h" />
     <ClInclude Include="Include\Model.h" />
-    <ClInclude Include="Include\myTriangle.h" />
     <ClInclude Include="Include\point3d.h" />
     <ClInclude Include="Include\Scenery.h" />
     <ClInclude Include="Include\Skybox.h" />
     <ClInclude Include="Include\Square.h" />
     <ClInclude Include="Include\Track.H" />
+    <ClInclude Include="Include\TrainHead.h" />
     <ClInclude Include="resource.h" />
     <CustomBuild Include="Include\TrainView.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>

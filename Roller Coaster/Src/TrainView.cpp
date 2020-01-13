@@ -37,14 +37,16 @@ void TrainView::initializeGL()
 	//Initialize the square object
 	square->Init();
 
-	test = new myTriangle();
-	test->InitShader("../../Shader/mountain with shadow.vs", "../../Shader/mountain with shadow.fs", 0);
-	test->InitShader("../../Shader/testSq.vs", "../../Shader/testSq.fs", 1);
-	test->InitVAO();
-	test->InitVBO();
+	scenery = new Scenery();
+	scenery->InitShader("../../Shader/mountain with shadow.vs", "../../Shader/mountain with shadow.fs", 0);
+	scenery->InitShader("../../Shader/testSq.vs", "../../Shader/testSq.fs", 1);
+	scenery->InitVAO();
+	scenery->InitVBO();
 
 	skybox = new Skybox(2);
 	skybox->Init();
+
+	trainHead = new TrainHead("../../Model/train/11709_train_v1_L3.obj", "../../Shader/train head.vs", "../../Shader/train head.fs");
 
 	//Initialize texture 
 	initializeTexture();
@@ -60,6 +62,15 @@ void TrainView::initializeTexture()
 	train = new Model("../../Model/train/11709_train_v1_L3.obj", 10, Point3d(0, 0, 0));
 	
 	Textures.push_back(skybox->texture);
+
+	Textures.push_back(new QOpenGLTexture(QImage("../../Model/train/11709_train_wood_diff.jpg")));
+	Textures.push_back(new QOpenGLTexture(QImage("../../Model/train/11709_train_wood_blue_diff.jpg")));
+	Textures.push_back(new QOpenGLTexture(QImage("../../Model/train/11709_train_wood_black_diff.jpg")));
+
+	for (int i = 0; i < 6; i++) {
+		glActiveTexture(GL_TEXTURE0 + i);
+		Textures[i]->bind();
+	}
 
 	initDepth();
 }
@@ -92,7 +103,7 @@ void TrainView::paintGL()
 	glDepthFunc(GL_LESS);
 
 	// Cull triangles which normal is not towards the camera
-	glEnable(GL_CULL_FACE);
+	//glEnable(GL_CULL_FACE);
 	//glCullFace(GL_BACK);
 	
 	glClearColor(1, 1, 1, 0);
@@ -125,7 +136,7 @@ void TrainView::paintGL()
 	depthShaderProgram->setUniformValue("ProjectionMatrix",depthProjectionMatrix);
 	depthShaderProgram->setUniformValue("ModelViewMatrix", depthViewMatrix);
 	//test->PaintMountainShadow(depthMVP.transposed(), depthShaderProgram);
-	test->PaintMountainShadow(ProjectionMatrex, ModelViewMatrex, depthShaderProgram);
+	scenery->PaintMountainShadow(ProjectionMatrex, ModelViewMatrex, depthShaderProgram);
 
 	auto FBOtext = frameBuffer->texture();
 
@@ -216,9 +227,9 @@ void TrainView::paintGL()
 	//*********************************************************************
 	// now draw the ground plane
 	//*********************************************************************
-	setupFloor();
+	/*setupFloor();
 	glDisable(GL_LIGHTING);
-	drawFloor(200, 10);
+	drawFloor(200, 10);*/
 
 
 	//*********************************************************************
@@ -246,7 +257,7 @@ void TrainView::paintGL()
 
 	
 
-	//Call triangle's render function, pass ModelViewMatrex and ProjectionMatrex
+	/*//Call triangle's render function, pass ModelViewMatrex and ProjectionMatrex
 	triangle->Paint(ProjectionMatrex, ModelViewMatrex);
 
 	//we manage textures by Trainview class, so we modify square's render function
@@ -259,7 +270,7 @@ void TrainView::paintGL()
 	square->shaderProgram->setUniformValue("Texture", 0);
 	//Call square's render function, pass ModelViewMatrex and ProjectionMatrex
 	square->Paint(ProjectionMatrex, ModelViewMatrex);
-	square->End();
+	square->End();*/
 
 	}
 	QMatrix4x4 biasMatrix(
@@ -270,33 +281,33 @@ void TrainView::paintGL()
 	);
 	//QMatrix4x4 depthBiasMVP = /*biasMatrix **/ depthMVP;
 	
-	test->Begin(false);
+	scenery->Begin(false);
 		//Active Texture
-		glActiveTexture(GL_TEXTURE1);
+		/*glActiveTexture(GL_TEXTURE1);
 		//Bind square's texture
-		Textures[1]->bind();
+		Textures[1]->bind();*/
 		//pass texture to shader
-		test->mountainShaderProgram->setUniformValue("Texture", 1);
+		scenery->mountainShaderProgram->setUniformValue("Texture", 1);
 		//test->mountainShaderProgram->setUniformValue("DepthBiasMVP", depthMVP);
-		test->mountainShaderProgram->setUniformValue("depthP", depthProjectionMatrix);
-		test->mountainShaderProgram->setUniformValue("depthMV", depthViewMatrix);
-		test->mountainShaderProgram->setUniformValue("shadowMap", frameBuffer->texture());
+		scenery->mountainShaderProgram->setUniformValue("depthP", depthProjectionMatrix);
+		scenery->mountainShaderProgram->setUniformValue("depthMV", depthViewMatrix);
+		scenery->mountainShaderProgram->setUniformValue("shadowMap", frameBuffer->texture());
 
-		test->PaintMountain(ProjectionMatrex, ModelViewMatrex, QVector3D(arcball.eyeX, arcball.eyeY, arcball.eyeZ));
-	test->End(false);
+		scenery->PaintMountain(ProjectionMatrex, ModelViewMatrex, QVector3D(-arcball.eyeX, -arcball.eyeY, -arcball.eyeZ));
+	scenery->End(false);
 	
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	test->Begin(true);
+	scenery->Begin(true);
 		//Active Texture
 		//glActiveTexture(GL_TEXTURE2);
 		//Bind square's texture
 		//Textures[2]->bind();
 		//pass texture to shader
-		test->waterShaderProgram->setUniformValue("envMap", 2);
+		scenery->waterShaderProgram->setUniformValue("envMap", 2);
 
-		test->PaintWater(ProjectionMatrex, ModelViewMatrex, QVector3D(arcball.eyeX, arcball.eyeY, arcball.eyeZ));
-	test->End(true);
+		scenery->PaintWater(ProjectionMatrex, ModelViewMatrex, QVector3D(arcball.eyeX, arcball.eyeY, arcball.eyeZ));
+	scenery->End(true);
 	glDisable(GL_BLEND);
 }
 
@@ -587,7 +598,15 @@ void TrainView::drawStuff(bool doingShadows)
 				trainDir = (worldPos + 10 - t_time) * (v2 - v1).normalize() +
 				(t_time - worldPos) * (v3 - v2).normalize();
 
-			train->changePos(Point3d(trainPos), trainDir.normalize(), (side1 * (v2 - v1)).normalize());
+			//train->changePos(Point3d(trainPos), trainDir.normalize(), (side1 * (v2 - v1)).normalize());
+			
+			Point3d ori = (side1 * (v2 - v1)).normalize(),
+				dir = trainDir.normalize();
+			float rX = -PI / 2 - acos(ori.y) * (ori.z > 0 ? 1 : -1) +PI/2,
+				rY = acos(dir.x) * (dir.z > 0 ? -1 : 1);;
+			//rX = rY = 0;
+
+			trainHead->drawTrain(ProjectionMatrex, ModelViewMatrex, QVector3D(trainPos.x, trainPos.y, trainPos.z), rX, rY);
 		}
 		worldPos += 10;
 	}
@@ -603,7 +622,7 @@ void TrainView::drawStuff(bool doingShadows)
 	glEnd();
 
 	//draw train
-	train->render(0,0);
+	//train->render(0,0);
 	if (t_time > worldPos) t_time -= worldPos;
 	
 

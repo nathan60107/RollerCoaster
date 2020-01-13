@@ -16,7 +16,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 
-class myTriangle
+class Scenery
 {
 public:
 	QOpenGLShaderProgram* mountainShaderProgram;
@@ -40,6 +40,7 @@ public:
 	QVector<QVector3D> vertices;
 	QVector<QVector2D> textureCord;
 	QOpenGLBuffer tvbo;
+	QOpenGLBuffer nvbo;
 	float t = 0;
 	int triangleCount;
 	int waterCount;
@@ -47,7 +48,7 @@ public:
 	int waterHeight;
 
 public:
-	myTriangle();
+	Scenery();
 	void InitVAO();
 	void InitVBO();
 	void InitShader(QString vertexShaderPath, QString fragmentShaderPath, int mode);
