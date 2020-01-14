@@ -57,6 +57,8 @@ AppMain::AppMain(QWidget *parent)
 	connect( ui.aTrain1     ,SIGNAL(triggered()),this,SLOT(setTrainNumber1()));
 	connect( ui.aTrain2     ,SIGNAL(triggered()),this,SLOT(setTrainNumber2()));
 	connect( ui.aTrain3     ,SIGNAL(triggered()),this,SLOT(setTrainNumber3()));
+	
+	connect( ui.aTunnel     ,SIGNAL(triggered()),this,SLOT(setTunnel()));
 }
 
 AppMain::~AppMain()
@@ -174,6 +176,10 @@ void AppMain::ToggleToolBar()
 void AppMain::ToggleStatusBar()
 {
 	ui.statusBar->setHidden( !ui.statusBar->isHidden() );
+}
+
+void AppMain::setTunnel() {
+	trainview->tunnelOn ^= 1;
 }
 
 void AppMain::setTrainNumber1()

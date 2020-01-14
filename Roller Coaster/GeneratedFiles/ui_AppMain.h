@@ -45,6 +45,7 @@ public:
     QAction *aTrain1;
     QAction *aTrain2;
     QAction *aTrain3;
+	QAction *aTunnel;
     QAction *aLine;
     QAction *aTrack;
     QAction *aRoad;
@@ -147,6 +148,10 @@ public:
 		aTrain3->setObjectName(QStringLiteral("aTrain3"));
 		aTrain3->setCheckable(false);
 		aTrain3->setChecked(false);
+		aTunnel = new QAction(AppMainClass);
+		aTunnel->setObjectName(QStringLiteral("aTunnel"));
+		aTunnel->setCheckable(false);
+		aTunnel->setChecked(false);
         aLine = new QAction(AppMainClass);
         aLine->setObjectName(QStringLiteral("aLine"));
         aLine->setCheckable(false);
@@ -572,6 +577,7 @@ public:
         menuCurve->setObjectName(QStringLiteral("menuCurve"));
 		menuTrainNumber = new QMenu(menuBar);
 		menuTrainNumber->setObjectName(QStringLiteral("menuTrainNumber"));
+		
         menuTrack = new QMenu(menuBar);
         menuTrack->setObjectName(QStringLiteral("menuTrack"));
         menuVelocity = new QMenu(menuBar);
@@ -589,7 +595,7 @@ public:
         menuBar->addAction(menuTrack->menuAction());
         menuBar->addAction(menuCurve->menuAction());
         menuBar->addAction(menuTrainNumber->menuAction());
-        menuBar->addAction(menuVelocity->menuAction());
+		menuBar->addAction(aTunnel);
         menuFile->addAction(aLoadPath);
         menuFile->addAction(aSavePath);
         menuFile->addSeparator();
@@ -629,6 +635,7 @@ public:
 		aTrain1->setText(QApplication::translate("AppMainClass", "Train1", Q_NULLPTR));
 		aTrain2->setText(QApplication::translate("AppMainClass", "Train2", Q_NULLPTR));
 		aTrain3->setText(QApplication::translate("AppMainClass", "Train3", Q_NULLPTR));
+		aTunnel->setText(QApplication::translate("AppMainClass", "Tunnel", Q_NULLPTR));
         aLine->setText(QApplication::translate("AppMainClass", "Line", Q_NULLPTR));
         aTrack->setText(QApplication::translate("AppMainClass", "Track", Q_NULLPTR));
         aRoad->setText(QApplication::translate("AppMainClass", "Road", Q_NULLPTR));

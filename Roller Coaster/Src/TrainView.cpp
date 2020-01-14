@@ -49,6 +49,9 @@ void TrainView::initializeGL()
 	for (int i = 0; i < 3; i++){
 		trainHead[i] = new TrainHead("../../Model/train/11709_train_v1_L3.obj", "../../Shader/train head.vs", "../../Shader/train head.fs");
 	}
+
+	tunnel = new Tunnel("../../Model/tunnel/tunnel.obj", "../../Shader/train head.vs", "../../Shader/train head.fs");
+
 	//Initialize texture 
 	initializeTexture();
 }
@@ -140,6 +143,9 @@ void TrainView::paintGL()
 		scenery->PaintMountainShadow(depthShaderProgram);
 		for (int i = 0; i < trainNumber; i++) {
 			trainHead[i]->drawTrainShadow(depthShaderProgram);
+		}
+		if (tunnelOn) {
+			tunnel->drawTrainShadow(depthShaderProgram);
 		}
 
 	depthShaderProgram->release();
@@ -247,13 +253,6 @@ void TrainView::paintGL()
 
 	drawStuff();
 
-	// this time drawing is for shadows (except for top view)
-	if (this->camera != 1) {
-		setupShadows();
-		drawStuff(true);
-		unsetupShadows();
-	}
-
 	//Get modelview matrix
 	glGetFloatv(GL_MODELVIEW_MATRIX, ModelViewMatrex);
 	//Get projection matrix
@@ -261,22 +260,6 @@ void TrainView::paintGL()
 
 	//QMatrix4x4(ModelViewMatrex);
 
-	
-
-	/*//Call triangle's render function, pass ModelViewMatrex and ProjectionMatrex
-	triangle->Paint(ProjectionMatrex, ModelViewMatrex);
-
-	//we manage textures by Trainview class, so we modify square's render function
-	square->Begin();
-	//Active Texture
-	glActiveTexture(GL_TEXTURE0);
-	//Bind square's texture
-	Textures[0]->bind();
-	//pass texture to shader
-	square->shaderProgram->setUniformValue("Texture", 0);
-	//Call square's render function, pass ModelViewMatrex and ProjectionMatrex
-	square->Paint(ProjectionMatrex, ModelViewMatrex);
-	square->End();*/
 
 	}
 	QMatrix4x4 biasMatrix(
@@ -358,8 +341,8 @@ setProjection()
 		glMatrixMode(GL_PROJECTION);
 		glLoadIdentity();
 		gluPerspective(arcball.fieldOfView, aspect, .1, 1000);
-		gluLookAt(trainHead[0]->pos.x/10 + trainHead[0]->front.x * 6, trainHead[0]->pos.y/10 + trainHead[0]->front.y * 6 + 3, trainHead[0]->pos.z/10 + trainHead[0]->front.z * 6,
-			trainHead[0]->pos.x/10 + trainHead[0]->front.x*7, trainHead[0]->pos.y/10 + trainHead[0]->front.y*7 + 3, trainHead[0]->pos.z/10 + trainHead[0]->front.z*7,
+		gluLookAt(trainHead[0]->pos.x/10 + trainHead[0]->front.x * 8, trainHead[0]->pos.y/10 + trainHead[0]->front.y * 8 + 3, trainHead[0]->pos.z/10 + trainHead[0]->front.z * 8,
+			trainHead[0]->pos.x/10 + trainHead[0]->front.x*9, trainHead[0]->pos.y/10 + trainHead[0]->front.y*9 + 3, trainHead[0]->pos.z/10 + trainHead[0]->front.z*9,
 			trainHead[0]->orient.x, trainHead[0]->orient.y, trainHead[0]->orient.z);
 		glMatrixMode(GL_MODELVIEW);
 		glLoadIdentity();
@@ -637,6 +620,10 @@ void TrainView::drawStuff(bool doingShadows)
 		}
 		
 		worldPos += 10;
+	}
+
+	if (tunnelOn) {
+		tunnel->drawTrain(ProjectionMatrex, ModelViewMatrex, QVector3D(-550, 100, 550));
 	}
 
 	glLineWidth(3);

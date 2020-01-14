@@ -57,6 +57,8 @@ private:
 	Ui::AppMainClass ui;
 
 	private slots:
+		void setTunnel();
+
 		void setTrainNumber1();
 		void setTrainNumber2();
 		void setTrainNumber3();

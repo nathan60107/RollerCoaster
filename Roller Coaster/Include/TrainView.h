@@ -14,6 +14,7 @@
 #include "Scenery.h"
 #include "Skybox.h"
 #include "TrainHead.h"
+#include "Tunnel.h"
 
 class AppMain;
 class CTrack;
@@ -75,6 +76,8 @@ public:
 	Scenery *scenery;
 	TrainHead *trainHead[3];
 	int trainNumber = 3;
+	Tunnel *tunnel;
+
 	GLfloat ProjectionMatrex[16];
 	GLfloat ModelViewMatrex[16];
 	QVector<QOpenGLTexture*> Textures;
@@ -94,6 +97,7 @@ public:
 	float percent;
 	float speed = 0.5;
 	float trainAngle = 0;
+	bool tunnelOn = 0;
 
 };  
 #endif // TRAINVIEW_H  

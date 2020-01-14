@@ -38,7 +38,7 @@ void main(){
 	vec4 v = vec4(vertexPosition_modelspace, 1);
 	v = v  * rotationY(rY) * rotationZ(rZ)* rotationX(rX);
 	
-	v = v + vec4(trainPos, 0) / 9;	
+	v = v + vec4(trainPos, 0) / 10;	
 	
 	pos = ProjectionMatrix * ModelViewMatrix * v;
 	gl_Position =  ProjectionMatrix * ModelViewMatrix * v;

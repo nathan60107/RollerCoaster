@@ -46,14 +46,13 @@ mat4 rotationZ( in float angle ) {
 
 void main(void)
 {
-	vec4 v = vec4(vertex, 1);
-	v = v * scale;
+	vec4 v = vec4(vertex * scale, 1);
 	if(isWheel){
-		v = ((v - vec4(center, 1)) * rotationZ(time)) + vec4(center, 1);
+		v = ((v - vec4(center * scale, 1)) * rotationZ(time)) + vec4(center * scale, 1);
 	}
 	v = v  * rotationY(rY) * rotationZ(rZ)* rotationX(rX);
 	
-	v = v + vec4(trainPos, 1) / 9;
+	v = v + vec4(trainPos, 0) / 10;
 	
 	vec4 p = ProjectionMatrix * ModelViewMatrix * v;
 	pos = p.xyz;
