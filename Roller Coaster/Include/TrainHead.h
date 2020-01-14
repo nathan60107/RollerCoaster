@@ -38,6 +38,8 @@ public:
 	float wheelTime = 0;
 	float scale = 1;
 	Point3d pos, front, orient;
+	float rX, rY, rZ;
+	QVector3D trainPos;
 
 	QOpenGLShaderProgram* shaderProgram;
 	QOpenGLShader* vertexShader;
@@ -47,4 +49,5 @@ public:
 	void InitShader(QString vertexShaderPath, QString fragmentShaderPath);
 	void DimensionTransformation(GLfloat source[], GLfloat target[][4]);
 	void drawTrain(GLfloat * ProjectionMatrix, GLfloat * ModelViewMatrix, QVector3D trainPos, Point3d p, Point3d dir, Point3d ori, float rX, float rY, float rZ);
+	void drawTrainShadow(QOpenGLShaderProgram * sp);
 };

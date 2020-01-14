@@ -107,11 +107,12 @@ void Scenery::PaintMountain(GLfloat* ProjectionMatrix, GLfloat* ModelViewMatrix,
 	//Draw a myTriangle with 3 indices starting from the 0th index
 	glDrawArrays(GL_TRIANGLES, 0, triangleCount);
 }
-void Scenery::PaintMountainShadow(GLfloat* ProjectionMatrix, GLfloat* ModelViewMatrix, QOpenGLShaderProgram *sp)
+void Scenery::PaintMountainShadow(QOpenGLShaderProgram *sp)
 {
-	//sp->bind();
-
-	depthVao.bind();
+	sp->setUniformValue("trainPos", QVector3D(0, 0, 0));
+	sp->setUniformValue("rX", (float)0.0);
+	sp->setUniformValue("rY", (float)0.0);
+	sp->setUniformValue("rZ", (float)0.0);
 
 	// Bind the buffer so that it is the current active buffer.
 	vvbo.bind();
@@ -126,10 +127,6 @@ void Scenery::PaintMountainShadow(GLfloat* ProjectionMatrix, GLfloat* ModelViewM
 	glDrawArrays(GL_TRIANGLES, 0, triangleCount);
 
 	sp->disableAttributeArray(0);
-
-	depthVao.release();
-
-	sp->release();
 }
 void Scenery::PaintWater(GLfloat* ProjectionMatrix, GLfloat* ModelViewMatrix, QVector3D eyeDir)
 {

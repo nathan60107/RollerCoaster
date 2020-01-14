@@ -133,11 +133,16 @@ void TrainView::paintGL()
 	//depthMVP = depthProjectionMatrix * depthViewMatrix;
 
 	depthShaderProgram->bind();
-	//depthShaderProgram->setUniformValue("depthMVP", depthMVP);
-	depthShaderProgram->setUniformValue("ProjectionMatrix",depthProjectionMatrix);
-	depthShaderProgram->setUniformValue("ModelViewMatrix", depthViewMatrix);
-	//test->PaintMountainShadow(depthMVP.transposed(), depthShaderProgram);
-	scenery->PaintMountainShadow(ProjectionMatrex, ModelViewMatrex, depthShaderProgram);
+		//depthShaderProgram->setUniformValue("depthMVP", depthMVP);
+		depthShaderProgram->setUniformValue("ProjectionMatrix",depthProjectionMatrix);
+		depthShaderProgram->setUniformValue("ModelViewMatrix", depthViewMatrix);
+		//test->PaintMountainShadow(depthMVP.transposed(), depthShaderProgram);
+		scenery->PaintMountainShadow(depthShaderProgram);
+		for (int i = 0; i < trainNumber; i++) {
+			trainHead[i]->drawTrainShadow(depthShaderProgram);
+		}
+
+	depthShaderProgram->release();
 
 	auto FBOtext = frameBuffer->texture();
 
@@ -415,6 +420,8 @@ void TrainView::initDepth()
 	QString vertexShaderPath("../../Shader/depth.vs"),
 			fragmentShaderPath("../../Shader/depth.fs");
 
+	printf("Loading shader \"%s\" & \"%s\"...\n", vertexShaderPath.toStdString().c_str(), fragmentShaderPath.toStdString().c_str());
+
 	// Create Shader
 	depthShaderProgram = new QOpenGLShaderProgram();
 	QFileInfo  vertexShaderFile(vertexShaderPath);
@@ -614,12 +621,16 @@ void TrainView::drawStuff(bool doingShadows)
 				float rX = acos(ori_noX.y) * (ori_noX.z > 0 ? 1 : -1),
 					rY = acos(dir_noY.z) * (dir_noY.x > 0 ? +1 : -1) - PI / 2,
 					rZ = acos(ori_noZ.y) * (ori_noZ.x > 0 ? -1 : 1);
+
+				if (ori.y < 0.1) {//解決over the top的軌道問題
+					rX += PI;
+				}
 			
 				trainHead[j]->drawTrain(ProjectionMatrex, ModelViewMatrex, 
 					QVector3D(trainPos.x, trainPos.y, trainPos.z), Point3d(trainPos), dir, ori,
 					rX, rY, rZ);
 
-				if (j == 0) {
+				if (j == 0) {//對車頭取行進角度
 					trainAngle = -dir.y;
 				}
 			}

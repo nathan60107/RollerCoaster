@@ -53,7 +53,7 @@ public:
 	void InitVBO();
 	void InitShader(QString vertexShaderPath, QString fragmentShaderPath, int mode);
 	void PaintMountain(GLfloat* ProjectionMatrix, GLfloat* ModelViewMatrix, QVector3D eyeDir);
-	void PaintMountainShadow(GLfloat* ProjectionMatrix, GLfloat* ModelViewMatrix, QOpenGLShaderProgram *sp);
+	void PaintMountainShadow(QOpenGLShaderProgram *sp);
 	void PaintWater(GLfloat * ProjectionMatrix, GLfloat * ModelViewMatrix, QVector3D eyeDir);
 	void End(int mode);
 	void static matrixFormat(GLfloat source[], GLfloat target[][4]);

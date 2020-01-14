@@ -174,8 +174,11 @@ void TrainHead::DimensionTransformation(GLfloat source[], GLfloat target[][4])
 		}
 }
 
-void TrainHead::drawTrain(GLfloat* ProjectionMatrix, GLfloat* ModelViewMatrix, QVector3D trainPos, Point3d p, Point3d dir, Point3d ori, float rX, float rY, float rZ) {
+void TrainHead::drawTrain(GLfloat* ProjectionMatrix, GLfloat* ModelViewMatrix, QVector3D trainPos_, Point3d p, Point3d dir, Point3d ori, float rX_, float rY_, float rZ_) {
 	pos = p, front = dir.normalize(), orient = ori;
+	rX = rX_, rY = rY_, rZ = rZ_;
+	trainPos = trainPos_;
+
 
 	shaderProgram->bind();
 	
@@ -226,4 +229,25 @@ void TrainHead::drawTrain(GLfloat* ProjectionMatrix, GLfloat* ModelViewMatrix, Q
 	shaderProgram->disableAttributeArray(2);
 
 	shaderProgram->release();
+}
+
+void TrainHead::drawTrainShadow(QOpenGLShaderProgram *sp)
+{
+	sp->setUniformValue("trainPos", trainPos);
+	sp->setUniformValue("rX", rX);
+	sp->setUniformValue("rY", rY);
+	sp->setUniformValue("rZ", rZ);
+	//printf("%f %f %f\n", rX, rY, rZ);
+
+	for (int i = 0; i <= objCounter; i++) {
+		trainPart[i].vvbo.bind();
+		shaderProgram->enableAttributeArray(0);
+		shaderProgram->setAttributeArray(0, GL_FLOAT, 0, 3, NULL);
+		trainPart[i].vvbo.release();
+
+		//Draw triangles with 4 indices starting from the 0th index
+		glDrawArrays(GL_TRIANGLES, 0, trainPart[i].vertexs.size());
+	}
+
+	sp->disableAttributeArray(0);
 }
