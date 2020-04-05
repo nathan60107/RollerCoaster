@@ -1,4 +1,5 @@
 執行檔位於x64/Release/Roller Coaster.exe
+介紹影片:https://youtu.be/TfZ_nP3zw_0
 
 有完成的功能有
 Arc Length
