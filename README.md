@@ -12,7 +12,7 @@
 |File->Load/Save path|可以讀取與儲存軌道，x64/Release/資料夾內放了五種不同的軌道檔案
 |Camara|可以選擇三種觀看視角，分別是遠觀、俯瞰、與第一人稱視角
 |Curve|可以選擇三種不同的軌道模式
-|Track|無作用(原本是改變軌道樣式的功能)
+|Track|無作用（原本是改變軌道樣式的功能）
 |Play|控制雲霄飛車移動/靜止
 |下方的控制條|控制雲霄飛車速度
 |Ctrl Point|可以增加/減少控制點
@@ -21,18 +21,20 @@
 |Tunnel|控制隧道的出現與否(需搭配隧道專用的軌道)
 
 
-## 有完成的功能有
-- C2 curve
-- nicer looking tracks
-- Correct Orientation in 3D
-- Sine waves
-- Skymapping reflection
-- Multiple cars
-- Real Train Wheels
-- Simple Physics(下坡加速上坡減速)
-- Non-flat terrain
-- Tunnels
-- Texture mapping
-- skybox
-- shadow map
-- blinn-phong
+## 已完成的功能有
+|名稱|功能
+|:-|:-
+|C2 curve|讓軌道的枕木間距相等以及行駛速度固定
+|Nicer looking tracks|繪製枕木
+|Correct Orientation in 3D|軌道和雲霄飛車以正確的方向繪製
+|Sine waves|場景中不斷擾動的水波
+|Skymapping reflection|水反射skybox的圖案
+|Multiple cars|多節車廂
+|Real Train Wheels|雲霄飛車的輪子會轉動（可透過暫停雲霄飛車來觀察）
+|Simple Physics|下坡加速上坡減速
+|Non-flat terrain|場景中綠色的山地
+|Tunnels|點Tunnel按鈕會出現的直線隧道
+|Texture mapping|正確貼圖
+|Skybox|背景的山與天空
+|Shadow map|山地會有來自水平方向的光與影子
+|Blinn-phong|山地會有光影的反射與散射
